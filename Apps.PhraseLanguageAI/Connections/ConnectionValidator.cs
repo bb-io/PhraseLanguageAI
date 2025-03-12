@@ -13,14 +13,21 @@ public class ConnectionValidator: IConnectionValidator
     {
         try
         {
-            var client = new Client(authenticationCredentialsProviders);
+            var client = new PhraseLanguageAiClient(authenticationCredentialsProviders);
 
-            await client.ExecuteWithErrorHandling(new RestRequest());
+            var userName = authenticationCredentialsProviders
+               .First(a => a.KeyName == "userName").Value;
+            var password = authenticationCredentialsProviders
+                .First(a => a.KeyName == "password").Value;
 
-            return new()
+            client.Login(userName, password);
+
+
+            return new ConnectionValidationResponse
             {
                 IsValid = true
             };
+
         } catch(Exception ex)
         {
             return new()
