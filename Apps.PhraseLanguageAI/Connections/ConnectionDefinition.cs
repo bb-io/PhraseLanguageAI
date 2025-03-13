@@ -19,7 +19,7 @@ public class ConnectionDefinition : IConnectionDefinition
                 new(CredsNames.Url) { DisplayName = "Url",
                 Description="Select the base URL according to your Phrase data center",
                  DataItems= [new("https://eu.phrase-staging.com/smt/api/", "EU data center"),
-                                new("https://us.phrase-staging.com/smt/api/","US data center")]
+                             new("https://us.phrase-staging.com/smt/api/", "US data center")]
                 },
             }
         }
@@ -43,8 +43,8 @@ public class ConnectionDefinition : IConnectionDefinition
 
         var url = values.First(v => v.Key == CredsNames.Url);
         yield return new AuthenticationCredentialsProvider(
-            password.Key,
-            password.Value
+             url.Key,
+             url.Value
         );
     }
 }
