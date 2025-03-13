@@ -16,18 +16,6 @@ namespace Apps.Appname.Actions;
 public class TranslateActions(InvocationContext invocationContext, IFileManagementClient fileManagerClient) : Invocable(invocationContext)
 {
 
-
-    [Action("Search list of language profiles", Description = "Search list of language profiles")]
-    public async Task<ListTranslationProfilesResponse> ListTranslationProfiles()
-    {
-        var client = new PhraseLanguageAiClient(invocationContext.AuthenticationCredentialsProviders);
-
-        var request = new RestRequest("v1/translationProfiles", Method.Get);
-
-        var response = await client.ExecuteWithErrorHandling<ListTranslationProfilesResponse>(request);
-        return response;
-    }
-
     [Action("Translate text", Description = "Translates text from source language to target language")]
     public async Task<TranslateTextResponse> TranslateText([ActionParameter] TranslateTextInput input)
     {
