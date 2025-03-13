@@ -76,7 +76,7 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
             await Task.Delay(5000);
             var statusResponse = await GetFileTranslationStatus(uid);
 
-            Console.WriteLine("Status Response JSON: " + JsonConvert.SerializeObject(statusResponse, Formatting.Indented));
+            //Console.WriteLine("Status Response JSON: " + JsonConvert.SerializeObject(statusResponse, Formatting.Indented));
 
             if (statusResponse.Actions != null &&
                 statusResponse.Actions.Any(a => a.Results != null && a.Results.Any(r => r.Status == "FAILED")))
@@ -97,14 +97,41 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
     }
 
     [Action("Translate file with quality estimation", Description = "Translates file with action type QUALITY_ESTIMATION")]
-    public async Task<FileTranslationResponse> TranslateFileWithQualityEstimation([ActionParameter] TranslateFileInput input)
+    public async Task<TranslationScoreResponse> TranslateFileWithQualityEstimation([ActionParameter] TranslateFileInput input)
     {
-        return await UploadFileForTranslation(input, "QUALITY_ESTIMATION");
+        var originalFileName = input.File.Name;
+
+        var uploadResponse = await UploadFileForTranslation(input, "QUALITY_ESTIMATION");
+        var uid = uploadResponse.Uid;
+        if (string.IsNullOrEmpty(uid))
+            throw new PluginApplicationException("No UID returned after file upload.");
+
+        while (true)
+        {
+            await Task.Delay(5000);
+            var statusResponse = await GetFileTranslationStatus(uid);
+
+            //Console.WriteLine("Status Response JSON: " + JsonConvert.SerializeObject(statusResponse, Formatting.Indented));
+
+            if (statusResponse.Actions != null &&
+                statusResponse.Actions.Any(a => a.Results != null && a.Results.Any(r => r.Status == "FAILED")))
+            {
+                throw new PluginApplicationException("File estimation failed (status=FAILED).");
+            }
+
+            bool allOk = statusResponse.Actions != null &&
+                         statusResponse.Actions.All(a => a.Results != null && a.Results.All(r => r.Status == "OK"));
+            if (allOk)
+                break;
+        }
+
+        var score = await GetTranslationScore(uid, "QUALITY_ESTIMATION", input.TargetLang);
+
+        return new TranslationScoreResponse { Score = score.Score, Uid = uid };
     }
 
 
-    public async Task<FileTranslationResponse> GetFileTranslationStatus(
-    [ActionParameter] string fileTranslationUid)
+    public async Task<FileTranslationResponse> GetFileTranslationStatus(string fileTranslationUid)
     {
         var client = new PhraseLanguageAiClient(InvocationContext.AuthenticationCredentialsProviders);
 
@@ -112,6 +139,22 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
 
         var response = await client.ExecuteWithErrorHandling<FileTranslationResponse>(request);
         return response;
+    }
+
+    public async Task<TranslationScoreResponse> GetTranslationScore(string uid, string actionType, string language)
+    {
+        var client = new PhraseLanguageAiClient(InvocationContext.AuthenticationCredentialsProviders);
+
+        var request = new RestRequest($"/v1/fileTranslations/{uid}/{actionType}/{language}", Method.Get);
+
+        request.AddHeader("Accept", "application/json");
+
+        var restResponse = await client.ExecuteWithErrorHandling(request);
+        if (!restResponse.IsSuccessful)
+            throw new PluginApplicationException($"Error: {restResponse.Content}");
+
+        var scoreResponse = JsonConvert.DeserializeObject<TranslationScoreResponse>(restResponse.Content);
+        return new TranslationScoreResponse { Score = scoreResponse.Score, Uid=uid };
     }
 
 

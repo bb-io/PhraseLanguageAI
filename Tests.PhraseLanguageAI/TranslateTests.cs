@@ -48,7 +48,7 @@ public class TranslateTests : TestBase
             }
         };
 
-        var response = await actions.UploadFileForTranslation(fileInput, "MT_GENERIC_PRETRANSLATE");
+        var response = await actions.UploadFileForTranslation(fileInput, "QUALITY_ESTIMATION");
 
         Console.WriteLine($"{response.Uid} - {response.Actions} - ");
         Assert.IsNotNull(response);
@@ -59,7 +59,7 @@ public class TranslateTests : TestBase
     {
         var actions = new TranslateActions(InvocationContext, FileManager);
 
-        var response = await actions.GetFileTranslationStatus("pEeTwu6jkaWCcpaW2MrlF0");
+        var response = await actions.GetFileTranslationStatus("n4z039HevEn3kGcQl01f3t");
 
         Console.WriteLine($"{response.Uid} - {response.Actions} - ");
         Assert.IsNotNull(response);
@@ -90,6 +90,27 @@ public class TranslateTests : TestBase
 
         var response = await actions.TranslateFileGenericPretranslate(fileInput);
 
+        Assert.IsNotNull(response);
+    }
+
+
+    [TestMethod]
+    public async Task GetFileScore_IsSuccess()
+    {
+        var actions = new TranslateActions(InvocationContext, FileManager);
+        var fileInput = new TranslateFileInput
+        {
+            SourceLang = "en",
+            TargetLang = "es",
+            File = new FileReference
+            {
+                Name = "test.txt"
+            }
+        };
+
+        var response = await actions.TranslateFileWithQualityEstimation(fileInput);
+
+        Console.WriteLine($"{response.Uid} - {response.Score}");
         Assert.IsNotNull(response);
     }
 
