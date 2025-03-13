@@ -1,20 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Product>Phrase language AI</Product>
-        <Description>Description</Description>
-        <Version>1.0.1</Version>
+        <Product>Phrase language AI [Beta]</Product>
+        <Description>The MT service from Phrase</Description>
+        <Version>1.0.2</Version>
         <AssemblyName>Apps.PhraseLanguageAI</AssemblyName>
     </PropertyGroup>
 
-    <ItemGroup>
-      <Compile Remove="image\**" />
-      <EmbeddedResource Remove="image\**" />
-      <None Remove="image\**" />
-    </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource CopyToOutputDirectory="Always" Include="image\icon.png" />
+	</ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Blackbird.Applications.Sdk.Common" Version="2.11.0" />

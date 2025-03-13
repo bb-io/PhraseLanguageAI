@@ -3,11 +3,11 @@ using Blackbird.Applications.Sdk.Common.Metadata;
 
 namespace Apps.Appname;
 
-public class Application : IApplication, ICategoryProvider
+public class PhraseLanguageAiApplication : IApplication, ICategoryProvider
 {
     public IEnumerable<ApplicationCategory> Categories
     {
-        get => [];
+        get => [ApplicationCategory.MachineTranslationAndMtqe];
         set { }
     }
 

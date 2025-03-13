@@ -5,7 +5,12 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Apps.PhraseLanguageAI", "Apps.PhraseLanguageAI\Apps.PhraseLanguageAI.csproj", "{EB25604E-8EBA-464E-BEDF-30EA95395AD3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.Appname", "Tests.PhraseLanguageAI\Tests.PhraseLanguageAI.csproj", "{B360EE3D-9F9A-4751-B39B-DB9766F201D1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.PhraseLanguageAI", "Tests.PhraseLanguageAI\Tests.PhraseLanguageAI.csproj", "{B360EE3D-9F9A-4751-B39B-DB9766F201D1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6077692B-E81A-4613-90A8-1F394E7AD72D}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
