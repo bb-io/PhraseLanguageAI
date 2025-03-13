@@ -1,6 +1,8 @@
 {
-  "ConnectionDefinition": {
-    "token": ""
-  },
-  "TestFolder": "TestFiles"
+    "ConnectionDefinition": {
+        "userName": "",
+        "password": "",
+        "url": ""
+    },
+    "TestFolder": "C:\\Users\\..."
 }

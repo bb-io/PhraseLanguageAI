@@ -1,11 +1,10 @@
 ﻿using Apps.Appname.Api;
 using Blackbird.Applications.Sdk.Common.Authentication;
 using Blackbird.Applications.Sdk.Common.Connections;
-using RestSharp;
 
 namespace Apps.Appname.Connections;
 
-public class ConnectionValidator: IConnectionValidator
+public class ConnectionValidator : IConnectionValidator
 {
     public async ValueTask<ConnectionValidationResponse> ValidateConnection(
         IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders,
@@ -28,7 +27,8 @@ public class ConnectionValidator: IConnectionValidator
                 IsValid = true
             };
 
-        } catch(Exception ex)
+        }
+        catch (Exception ex)
         {
             return new()
             {

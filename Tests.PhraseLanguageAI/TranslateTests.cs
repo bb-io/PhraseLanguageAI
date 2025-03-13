@@ -1,5 +1,6 @@
 ﻿using Apps.Appname.Actions;
 using Apps.PhraseLanguageAI.Models.Request;
+using Blackbird.Applications.Sdk.Common.Files;
 using Newtonsoft.Json;
 using Tests.Appname.Base;
 
@@ -11,7 +12,7 @@ public class TranslateTests : TestBase
     [TestMethod]
     public async Task GetLanguageList_IsSuccess()
     {
-        var actions = new TranslateActions(InvocationContext);
+        var actions = new TranslateActions(InvocationContext,FileManager);
 
         var response = await actions.ListTranslationProfiles();
 
@@ -21,16 +22,75 @@ public class TranslateTests : TestBase
             Assert.IsNotNull(item);
         }
     }
-    //
 
     [TestMethod]
     public async Task TranslateText_IsSuccess()
     {
-        var actions = new TranslateActions(InvocationContext);
+        var actions = new TranslateActions(InvocationContext,FileManager);
 
         var response = await actions.TranslateText(new TranslateTextInput { SourceLang= "en", TargetLang="es", Text="Hello my dear friend how are you?"});
 
         Console.WriteLine($"{response.SourceLang} - {response.TargetLang} - {response.TranslatedTexts}");
         Assert.IsNotNull(response);
     }
+
+    [TestMethod]
+    public async Task UplloadFileGeneric_IsSuccess()
+    {
+        var actions = new TranslateActions(InvocationContext, FileManager);
+        var fileInput = new TranslateFileInput
+        {
+            SourceLang = "en",
+            TargetLang = "es",
+            File = new FileReference
+            {
+                Name = "test.txt"
+            }
+        };
+
+        var response = await actions.UploadFileForTranslation(fileInput, "MT_GENERIC_PRETRANSLATE");
+
+        Console.WriteLine($"{response.Uid} - {response.Actions} - ");
+        Assert.IsNotNull(response);
+    }
+
+    [TestMethod]
+    public async Task GetFileStatus_IsSuccess()
+    {
+        var actions = new TranslateActions(InvocationContext, FileManager);
+
+        var response = await actions.GetFileTranslationStatus("pEeTwu6jkaWCcpaW2MrlF0");
+
+        Console.WriteLine($"{response.Uid} - {response.Actions} - ");
+        Assert.IsNotNull(response);
+    }
+
+    [TestMethod]
+    public async Task DownloadFile_IsSuccess()
+    {
+        var actions = new TranslateActions(InvocationContext, FileManager);
+
+        var response = await actions.DownloadFileTranslation("pEeTwu6jkaWCcpaW2MrlF0", "MT_GENERIC_PRETRANSLATE", "es", "Test.txt");
+        Assert.IsNotNull(response);
+    }
+
+    [TestMethod]
+    public async Task TranslateFileGenericPretranslate_IsSuccess()
+    {
+        var actions = new TranslateActions(InvocationContext, FileManager);
+        var fileInput = new TranslateFileInput
+        {
+            SourceLang = "en",
+            TargetLang = "es",
+            File = new FileReference
+            {
+                Name = "test.xlsx"
+            }
+        };
+
+        var response = await actions.TranslateFileGenericPretranslate(fileInput);
+
+        Assert.IsNotNull(response);
+    }
+
 }

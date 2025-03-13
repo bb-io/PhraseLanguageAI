@@ -3,10 +3,8 @@ using Apps.Appname.Constants;
 using Apps.PhraseLanguageAI.Models;
 using Blackbird.Applications.Sdk.Common.Authentication;
 using Blackbird.Applications.Sdk.Common.Exceptions;
-using Blackbird.Applications.Sdk.Utils.Extensions.Sdk;
 using Blackbird.Applications.Sdk.Utils.RestSharp;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using RestSharp;
 
 namespace Apps.Appname.Api;
@@ -18,8 +16,6 @@ public class PhraseLanguageAiClient : BlackBirdRestClient
         BaseUrl = GetUri(creds),
     })
     {
-        this.AddDefaultHeader("Accept", "application/json");
-
         var userName = creds.First(p => p.KeyName == CredsNames.UserName).Value;
         var password = creds.First(p => p.KeyName == CredsNames.Password).Value;
 
@@ -62,12 +58,9 @@ public class PhraseLanguageAiClient : BlackBirdRestClient
         return JsonConvert.DeserializeObject<T>(response.Content, JsonSettings);
     }
 
-
-
     protected override Exception ConfigureErrorException(RestResponse response)
     {
-
-        throw new PluginApplicationException(response.ErrorMessage.ToString());
+        throw new PluginApplicationException(response.Content);
     }
     private static Uri GetUri(IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders)
     {
@@ -75,11 +68,9 @@ public class PhraseLanguageAiClient : BlackBirdRestClient
         return new(url.TrimEnd('/'));
     }
 
-   public string Login(string userName, string password)
-        {
+    public string Login(string userName, string password)
+    {
         var request = new RestRequest("v1/auth/login", Method.Post);
-        request.AddHeader("Content-Type", "application/json");
-        request.AddHeader("Accept", "application/json");
 
         request.AddJsonBody(new
         {

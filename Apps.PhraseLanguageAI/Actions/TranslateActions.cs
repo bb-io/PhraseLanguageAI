@@ -1,18 +1,22 @@
-using System.Threading;
-using Apps.Appname.Api;
+﻿using Apps.Appname.Api;
 using Apps.PhraseLanguageAI.Models.Request;
 using Apps.PhraseLanguageAI.Models.Response;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
-using Blackbird.Applications.Sdk.Common.Authentication;
+using Blackbird.Applications.Sdk.Common.Exceptions;
+using Blackbird.Applications.Sdk.Common.Files;
 using Blackbird.Applications.Sdk.Common.Invocation;
+using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
+using Newtonsoft.Json;
 using RestSharp;
 
 namespace Apps.Appname.Actions;
 
 [ActionList]
-public class TranslateActions(InvocationContext invocationContext) : Invocable(invocationContext)
+public class TranslateActions(InvocationContext invocationContext, IFileManagementClient fileManagerClient) : Invocable(invocationContext)
 {
+
+
     [Action("Search list of language profiles", Description = "Search list of language profiles")]
     public async Task<ListTranslationProfilesResponse> ListTranslationProfiles()
     {
@@ -54,5 +58,134 @@ public class TranslateActions(InvocationContext invocationContext) : Invocable(i
 
         var response = await client.ExecuteWithErrorHandling<TranslateTextDto>(request);
         return new TranslateTextResponse(response);
+    }
+
+
+    [Action("Translate file", Description = "Translates file with action type MT_GENERIC_PRETRANSLATE")]
+    public async Task<FileResponse> TranslateFileGenericPretranslate([ActionParameter] TranslateFileInput input)
+    {
+        var originalFileName = input.File.Name;
+
+        var uploadResponse = await UploadFileForTranslation(input, "MT_GENERIC_PRETRANSLATE");
+        var uid = uploadResponse.Uid;
+        if (string.IsNullOrEmpty(uid))
+            throw new PluginApplicationException("No UID returned after file upload.");
+
+        while (true)
+        {
+            await Task.Delay(10000);
+            var statusResponse = await GetFileTranslationStatus(uid);
+
+            Console.WriteLine("Status Response JSON: " + JsonConvert.SerializeObject(statusResponse, Formatting.Indented));
+
+            if (statusResponse.Actions != null &&
+                statusResponse.Actions.Any(a => a.Results != null && a.Results.Any(r => r.Status == "FAILED")))
+            {
+                throw new PluginApplicationException("File translation failed (status=FAILED).");
+            }
+
+            bool allOk = statusResponse.Actions != null &&
+                         statusResponse.Actions.All(a => a.Results != null && a.Results.All(r => r.Status == "OK"));
+            if (allOk)
+                break;
+        }
+
+        var downloadedFile = await DownloadFileTranslation(uid, "MT_GENERIC_PRETRANSLATE", input.TargetLang, originalFileName);
+        downloadedFile.Name = originalFileName;
+
+        return new FileResponse { File = downloadedFile, Uid = uid, };
+    }
+
+    [Action("Translate file with quality estimation", Description = "Translates file with action type QUALITY_ESTIMATION")]
+    public async Task<FileTranslationResponse> TranslateFileWithQualityEstimation([ActionParameter] TranslateFileInput input)
+    {
+        return await UploadFileForTranslation(input, "QUALITY_ESTIMATION");
+    }
+
+
+    public async Task<FileTranslationResponse> GetFileTranslationStatus(
+    [ActionParameter] string fileTranslationUid)
+    {
+        var client = new PhraseLanguageAiClient(InvocationContext.AuthenticationCredentialsProviders);
+
+        var request = new RestRequest($"v1/fileTranslations/{fileTranslationUid}", Method.Get);
+
+        var response = await client.ExecuteWithErrorHandling<FileTranslationResponse>(request);
+        return response;
+    }
+
+
+    public async Task<FileReference> DownloadFileTranslation(string uid, string actionType, string language, string originalFileName)
+    {
+        var client = new PhraseLanguageAiClient(InvocationContext.AuthenticationCredentialsProviders);
+
+        var request = new RestRequest($"/v1/fileTranslations/{uid}/{actionType}/{language}", Method.Get);
+
+        request.AddHeader("Accept", "application/octet-stream");
+
+        var restResponse = await client.ExecuteWithErrorHandling(request);
+        if (!restResponse.IsSuccessful)
+            throw new PluginApplicationException($"Error: {restResponse.Content}");
+
+        var contentType = restResponse.ContentType?.ToLowerInvariant() ?? "";
+        if (!contentType.StartsWith("application/octet-stream"))
+            throw new PluginApplicationException($"Server didn't return application/octet-stream. Content-Type: {contentType}");
+
+        var fileBytes = restResponse.RawBytes ?? Array.Empty<byte>();
+
+        var contentDisposition = restResponse.Headers
+            .FirstOrDefault(x => x.Name.Equals("Content-Disposition", StringComparison.OrdinalIgnoreCase))
+            ?.Value?.ToString();
+        string fileName = originalFileName;
+        if (!string.IsNullOrEmpty(contentDisposition))
+        {
+            var match = System.Text.RegularExpressions.Regex.Match(contentDisposition, @"filename=""([^""]+)""");
+            if (match.Success)
+                fileName = match.Groups[1].Value;
+        }
+
+        var localRef = new FileReference
+        {
+            Name = fileName,
+            ContentType = contentType
+        };
+
+
+        using var ms = new MemoryStream(fileBytes);
+        var uploaded = await fileManagerClient.UploadAsync(ms, localRef.ContentType, localRef.Name);
+        return uploaded;
+    }
+
+    public async Task<FileTranslationResponse> UploadFileForTranslation(TranslateFileInput input, string actionType)
+    {
+        var client = new PhraseLanguageAiClient(InvocationContext.AuthenticationCredentialsProviders);
+
+        var request = new RestRequest("v1/fileTranslations", Method.Post)
+        {
+            AlwaysMultipartFormData = true
+        };
+
+        var fileStream = await fileManagerClient.DownloadAsync(input.File);
+
+        var fileName = string.IsNullOrEmpty(input.File.Name) ? "file" : input.File.Name;
+        var contentType = string.IsNullOrEmpty(input.File.ContentType)
+            ? "application/octet-stream"
+            : input.File.ContentType;
+
+        request.AddFile("file", () => fileStream, fileName, contentType);
+
+        var metadata = new
+        {
+            sourceLang = new { code = input.SourceLang },
+            targetLangs = new[] { new { code = input.TargetLang } },
+            actionTypes = new[] { actionType },
+        };
+        var metadataJson = System.Text.Json.JsonSerializer.Serialize(metadata);
+        var metadataBytes = System.Text.Encoding.UTF8.GetBytes(metadataJson);
+
+        request.AddFile("metadata", metadataBytes, "metadata.json", "application/json");
+
+        var response = await client.ExecuteWithErrorHandling<FileTranslationResponse>(request);
+        return response;
     }
 }
