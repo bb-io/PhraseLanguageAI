@@ -14,6 +14,7 @@ public class PhraseLanguageAiClient : BlackBirdRestClient
     public PhraseLanguageAiClient(IEnumerable<AuthenticationCredentialsProvider> creds) : base(new()
     {
         BaseUrl = GetUri(creds),
+        MaxTimeout = 180000
     })
     {
         var userName = creds.First(p => p.KeyName == CredsNames.UserName).Value;

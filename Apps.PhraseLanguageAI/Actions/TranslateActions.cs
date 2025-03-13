@@ -73,7 +73,7 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
 
         while (true)
         {
-            await Task.Delay(10000);
+            await Task.Delay(5000);
             var statusResponse = await GetFileTranslationStatus(uid);
 
             Console.WriteLine("Status Response JSON: " + JsonConvert.SerializeObject(statusResponse, Formatting.Indented));
@@ -120,6 +120,7 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
         var client = new PhraseLanguageAiClient(InvocationContext.AuthenticationCredentialsProviders);
 
         var request = new RestRequest($"/v1/fileTranslations/{uid}/{actionType}/{language}", Method.Get);
+
 
         request.AddHeader("Accept", "application/octet-stream");
 

@@ -70,7 +70,7 @@ public class TranslateTests : TestBase
     {
         var actions = new TranslateActions(InvocationContext, FileManager);
 
-        var response = await actions.DownloadFileTranslation("pEeTwu6jkaWCcpaW2MrlF0", "MT_GENERIC_PRETRANSLATE", "es", "Test.txt");
+        var response = await actions.DownloadFileTranslation("0ifJrHq2hjNCviRCg0l726", "MT_GENERIC_PRETRANSLATE", "es", "Test.txt");
         Assert.IsNotNull(response);
     }
 
@@ -84,7 +84,7 @@ public class TranslateTests : TestBase
             TargetLang = "es",
             File = new FileReference
             {
-                Name = "test.xlsx"
+                Name = "test.html"
             }
         };
 

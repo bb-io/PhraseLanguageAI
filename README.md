@@ -19,7 +19,7 @@ Before you can connect you need to make sure that:
 1. Navigate to Apps, and identify the Phrase language AI app. You can use search to find it.
 2. Click _Add Connection_.
 3. Name your connection for future reference e.g. 'My Phrase language AI connection'.
-4. Fill in the User name field and Password to your Phrase language AI account.
+4. Fill in the User name field and Password to your Phrase language AI account and choose the data center to use.
 5. Click _Connect_.
 
 ## Actions
