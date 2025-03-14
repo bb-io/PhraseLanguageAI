@@ -84,7 +84,7 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
         return new FileResponse { File = downloadedFile, Uid = uid, };
     }
 
-    [Action("Translate file with quality estimation", Description = "Translates file with action type QUALITY_ESTIMATION")]
+    [Action("Get quality estimation", Description = "Get quality estimation of translation file")]
     public async Task<TranslationScoreResponse> TranslateFileWithQualityEstimation([ActionParameter] TranslateFileInput input)
     {
         var originalFileName = input.File.Name;
