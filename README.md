@@ -7,6 +7,49 @@ Blackbird is the new automation backbone for the language technology industry. B
 <!-- begin docs -->
 
 Phrase Language AI specializes in language translation services. It offers a  machine translation (MT) engine capable of providing high-quality translations across multiple languages and ability to understand context.
+Phrase Language AI can be used for raw machine translation workflows that require high volumes of translation without any post-editing steps.
+The minimum requirement for using Phrase Language AI via API is the Phrase Portal user role.
+Phrase Language AI enables file-based translation for the following file types: `.DOCX`, `.TXT`, `.XLSX`, `.CSV`, `.PPTX`, `.HTM/.HTML`, `.XML`, `.JSON`, `.MD`, `.XLF/.XLIFF`, `.SDLXLIFF`.
+
+### MT Autoselect Supported Languages
+
+MT Autoselect supports domain-based recommendation for all documents in these source languages:
+- English
+- Czech
+- German
+- Spanish
+- French
+- Italian
+- Japanese
+- Korean
+- Dutch
+- Russian
+- Swedish
+- Chinese Simplified
+
+All other language combinations get MT Autoselect recommendations but do not take text domain into account.
+
+### Domains 
+
+The type of content translated with machine translation can significantly affect the quality of the output. An engine that might perform well for product descriptions might struggle with a medical report. The content type variable is known as a domain.
+Categorizing documents into domains is normally a process that requires human input, creating complications when it comes to scaling translation and allows for basic human error.
+Domains were created automatically using an AI-powered analysis of documents. An unsupervised machine learning algorithm recognized 11 distinct types of documents that shared similar sets of keywords:
+
+| Domain                         | Keywords                                                |
+|--------------------------------|---------------------------------------------------------|
+| Medical                        | study, patients, patient, treatment, dose, mg, clinical |
+| Travel and Hospitality         | km, hotel, guests, room, accommodation                  |
+| Business and Education         | team, business, work, school, students                  |
+| Legal and Finance              | agreement, company, contract, services, financial       |
+| Software User Documentation    | click, select, data, text, review, file                 |
+| Consumer Electronics           | power, battery, switch, sensor, usb                     |
+| Customer Support               | account, email, account, domain, contact                |
+| Cloud Services                 | network, server, database, sql, data                    |
+| Industrial                     | mm, pressure, valve, machine, oil                       |
+| Software Development           | value, class, type, element, string                     |
+| Entertainment                  | game, like, get, love, play, go                         |
+
+
 
 ## Before setting up
 
