@@ -6,20 +6,20 @@ Blackbird is the new automation backbone for the language technology industry. B
 
 <!-- begin docs -->
 
-Phrase language AI specializes in language translation services. It offers a  machine translation (MT) engine capable of providing high-quality translations across multiple languages and ability to understand context.
+Phrase Language AI specializes in language translation services. It offers a  machine translation (MT) engine capable of providing high-quality translations across multiple languages and ability to understand context.
 
 ## Before setting up
 
 Before you can connect you need to make sure that:
 
-- You have a Phrase language AI account.
+- You have a Phrase Language AI account.
 
 ## Connecting
 
-1. Navigate to Apps, and identify the Phrase language AI app. You can use search to find it.
+1. Navigate to Apps, and identify the Phrase Language AI app. You can use search to find it.
 2. Click _Add Connection_.
-3. Name your connection for future reference e.g. 'My Phrase language AI connection'.
-4. Fill in the User name field and Password to your Phrase language AI account and choose the data center to use.
+3. Name your connection for future reference e.g. 'My Phrase Language AI connection'.
+4. Fill in the User name field and Password to your Phrase Language AI account and choose the data center to use.
 5. Click _Connect_.
 
 ## Actions
