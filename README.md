@@ -6,7 +6,7 @@ Blackbird is the new automation backbone for the language technology industry. B
 
 <!-- begin docs -->
 
-Phrase Language AI specializes in language translation services. It offers a  machine translation (MT) engine capable of providing high-quality translations across multiple languages and ability to understand context.
+[Phrase Language AI](https://support.phrase.com/hc/en-us/articles/5709660879516-Phrase-Language-AI-TMS) specializes in language translation services. It offers a  machine translation (MT) engine capable of providing high-quality translations across multiple languages and ability to understand context.
 Phrase Language AI can be used for raw machine translation workflows that require high volumes of translation without any post-editing steps.
 The minimum requirement for using Phrase Language AI via API is the Phrase Portal user role.
 Phrase Language AI enables file-based translation for the following file types: `.DOCX`, `.TXT`, `.XLSX`, `.CSV`, `.PPTX`, `.HTM/.HTML`, `.XML`, `.JSON`, `.MD`, `.XLF/.XLIFF`, `.SDLXLIFF`.
