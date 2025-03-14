@@ -28,6 +28,7 @@ Before you can connect you need to make sure that:
 
 - **Translate text** Translates text from source language to target language
 - **Translate file** Translate a file
+- **Get quality estimation** Get quality estimation of a translation
 
 ## Feedback
 

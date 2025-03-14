@@ -4,7 +4,7 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Product>Phrase language AI [Beta]</Product>
+        <Product>Phrase Language AI [Beta]</Product>
         <Description>The MT service from Phrase</Description>
         <Version>1.0.2</Version>
         <AssemblyName>Apps.PhraseLanguageAI</AssemblyName>
