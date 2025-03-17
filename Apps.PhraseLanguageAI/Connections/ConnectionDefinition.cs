@@ -18,8 +18,8 @@ public class ConnectionDefinition : IConnectionDefinition
                 new(CredsNames.Password) { DisplayName = "Password" , Sensitive=true},
                 new(CredsNames.Url) { DisplayName = "Url",
                 Description="Select the base URL according to your Phrase data center",
-                 DataItems= [new("https://eu.phrase.com/smt/api/", "EU data center"),
-                             new("https://us.phrase.com/smt/api/", "US data center")]
+                 DataItems= [new("https://eu.phrase-staging.com/smt/api/", "EU data center"),
+                             new("https://us.phrase-staging.com/smt/api/", "US data center")]
                 },
             }
         }
