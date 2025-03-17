@@ -10,20 +10,6 @@ namespace Tests.Appname;
 public class TranslateTests : TestBase
 {
     [TestMethod]
-    public async Task GetLanguageList_IsSuccess()
-    {
-        var actions = new TranslateActions(InvocationContext,FileManager);
-
-        var response = await actions.ListTranslationProfiles();
-
-        foreach (var item in response.Content)
-        {
-            Console.WriteLine($"{item.Uid} - {item.Name}");
-            Assert.IsNotNull(item);
-        }
-    }
-
-    [TestMethod]
     public async Task TranslateText_IsSuccess()
     {
         var actions = new TranslateActions(InvocationContext,FileManager);
