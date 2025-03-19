@@ -19,7 +19,10 @@ public class ConnectionValidator : IConnectionValidator
             var password = authenticationCredentialsProviders
                 .First(a => a.KeyName == "password").Value;
 
-            client.Login(userName, password);
+            var projectId = authenticationCredentialsProviders
+               .First(a => a.KeyName == "uid").Value;
+
+            client.Login(userName, password, projectId);
 
 
             return new ConnectionValidationResponse
