@@ -19,7 +19,7 @@ public class PhraseLanguageAiClient : BlackBirdRestClient
     {
         var userName = creds.First(p => p.KeyName == CredsNames.UserName).Value;
         var password = creds.First(p => p.KeyName == CredsNames.Password).Value;
-        var projectId = creds.First(p => p.KeyName == CredsNames.ProjectId).Value;
+        var projectId = creds.First(p => p.KeyName == CredsNames.OrganizationId).Value;
 
         var token = Login(userName, password,projectId);
 
