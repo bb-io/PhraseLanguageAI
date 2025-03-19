@@ -50,7 +50,7 @@ public class ConnectionDefinition : IConnectionDefinition
              url.Key,
              url.Value
         );
-        var projectId = values.First(v => v.Key == "projectId");
+        var projectId = values.First(v => v.Key == CredsNames.ProjectId);
         yield return new AuthenticationCredentialsProvider(
             projectId.Key,
             projectId.Value
