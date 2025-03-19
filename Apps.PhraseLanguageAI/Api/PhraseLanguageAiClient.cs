@@ -19,8 +19,9 @@ public class PhraseLanguageAiClient : BlackBirdRestClient
     {
         var userName = creds.First(p => p.KeyName == CredsNames.UserName).Value;
         var password = creds.First(p => p.KeyName == CredsNames.Password).Value;
+        var projectId = creds.First(p => p.KeyName == CredsNames.OrganizationId).Value;
 
-        var token = Login(userName, password);
+        var token = Login(userName, password,projectId);
 
         this.AddDefaultHeader("Authorization", $"Bearer {token}");
     }
@@ -69,14 +70,18 @@ public class PhraseLanguageAiClient : BlackBirdRestClient
         return new(url.TrimEnd('/'));
     }
 
-    public string Login(string userName, string password)
+    public string Login(string userName, string password, string projectId)
     {
         var request = new RestRequest("v1/auth/login", Method.Post);
 
         request.AddJsonBody(new
         {
             userName = userName,
-            password = password
+            password = password,
+            organization = new
+            {
+                uid = projectId
+            }
         });
 
         TokenResponse response;

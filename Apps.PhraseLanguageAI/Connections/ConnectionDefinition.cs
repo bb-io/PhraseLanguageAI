@@ -24,6 +24,7 @@ public class ConnectionDefinition : IConnectionDefinition
                              new("https://us.phrase.com/smt/api/", "US data center(Production)"),
                  ]
                 },
+                 new(CredsNames.OrganizationId) { DisplayName = "Organization ID", Description = "Enter the organization ID" }
             }
         }
     };
@@ -48,6 +49,11 @@ public class ConnectionDefinition : IConnectionDefinition
         yield return new AuthenticationCredentialsProvider(
              url.Key,
              url.Value
+        );
+        var projectId = values.First(v => v.Key == CredsNames.OrganizationId);
+        yield return new AuthenticationCredentialsProvider(
+            projectId.Key,
+            projectId.Value
         );
     }
 }

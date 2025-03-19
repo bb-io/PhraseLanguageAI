@@ -56,7 +56,7 @@ public class TranslateTests : TestBase
     {
         var actions = new TranslateActions(InvocationContext, FileManager);
 
-        var response = await actions.DownloadFileTranslation("0ifJrHq2hjNCviRCg0l726", "MT_GENERIC_PRETRANSLATE", "es", "Test.txt");
+        var response = await actions.DownloadFileTranslation("0rWrCIa3kvMCsW1LCGE0K7", "MT_GENERIC_PRETRANSLATE", "es", "test.html");
         Assert.IsNotNull(response);
     }
 
