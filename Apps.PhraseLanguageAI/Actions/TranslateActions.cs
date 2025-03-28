@@ -41,6 +41,13 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
             targetLang = new
             {
                 code = input.TargetLang
+            },
+            mtSettings = new
+            {
+                profile = new
+                {
+                    uid = input.Uid
+                }
             }
         });
 

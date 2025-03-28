@@ -4,8 +4,8 @@ namespace Apps.PhraseLanguageAI.Models.Response
 {
     public class TranslateTextResponse
     {
-        [Display("Consumer ID")]
-        public string ConsumerId { get; set; }
+        //[Display("Consumer ID")]
+        //public string ConsumerId { get; set; }
 
         [Display("Source language")]
         public string SourceLang { get; set; }
@@ -18,7 +18,7 @@ namespace Apps.PhraseLanguageAI.Models.Response
 
         public TranslateTextResponse(TranslateTextDto response)
         {
-            ConsumerId = response.ConsumerId;
+            //ConsumerId = response.ConsumerId;
             SourceLang = response.SourceLang?.Code ?? string.Empty;
             TargetLang = response.TargetLang?.Code ?? string.Empty;
             TranslatedTexts = response.TranslatedTexts != null

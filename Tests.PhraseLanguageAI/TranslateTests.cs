@@ -1,5 +1,7 @@
 ﻿using Apps.Appname.Actions;
+using Apps.Appname.Handlers;
 using Apps.PhraseLanguageAI.Models.Request;
+using Blackbird.Applications.Sdk.Common.Dynamic;
 using Blackbird.Applications.Sdk.Common.Files;
 using Newtonsoft.Json;
 using Tests.Appname.Base;
@@ -98,6 +100,18 @@ public class TranslateTests : TestBase
 
         Console.WriteLine($"{response.Uid} - {response.Score}");
         Assert.IsNotNull(response);
+    }
+
+    [TestMethod]
+    public async Task LanguageProfileReturnsValues()
+    {
+        var action = new LanguageAiProfilesDataHandler(InvocationContext);
+       
+        var response = await action.GetDataAsync(new DataSourceContext { }, CancellationToken.None);
+        foreach (var profile in response)
+        {
+            Console.WriteLine($"{profile.Key} - {profile.Value}");
+        }
     }
 
 }
