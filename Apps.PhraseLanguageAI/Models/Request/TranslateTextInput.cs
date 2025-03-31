@@ -1,4 +1,8 @@
-﻿using Blackbird.Applications.Sdk.Common;
+﻿using Apps.Appname.Handlers;
+using Apps.Appname.Handlers.Static;
+using Blackbird.Applications.Sdk.Common;
+using Blackbird.Applications.Sdk.Common.Dictionaries;
+using Blackbird.Applications.Sdk.Common.Dynamic;
 
 namespace Apps.PhraseLanguageAI.Models.Request
 {
@@ -7,10 +11,16 @@ namespace Apps.PhraseLanguageAI.Models.Request
         public string Text { get; set; }
 
         [Display("Source language")]
+        [StaticDataSource(typeof(LanguageCodesHandler))]
         public string SourceLang { get; set; }
 
 
         [Display("Target language")]
+        [StaticDataSource(typeof(LanguageCodesHandler))]
         public string TargetLang { get; set; }
+
+        [Display("Language profile ID")]
+        [DataSource(typeof(LanguageAiProfilesDataHandler))]
+        public string? Uid { get; set; }
     }
 }

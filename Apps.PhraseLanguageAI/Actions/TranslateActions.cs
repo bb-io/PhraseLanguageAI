@@ -23,26 +23,20 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
 
         var request = new RestRequest("v2/textTranslations", Method.Post);
 
-        request.AddJsonBody(new
+        var body = new Dictionary<string, object>
         {
-            consumerId = "BLACKBIRD",
-            sourceTexts = new[]
-            {
-                new
-                {
-                    key = "text",
-                    source  = input.Text
-                }
-            },
-            sourceLang = new
-            {
-                code = input.SourceLang
-            },
-            targetLang = new
-            {
-                code = input.TargetLang
-            }
-        });
+            { "consumerId", "BLACKBIRD" },
+            { "sourceTexts", new[] { new { key = "text", source = input.Text } } },
+            { "sourceLang", new { code = input.SourceLang } },
+            { "targetLang", new { code = input.TargetLang } }
+        };
+
+        if (!string.IsNullOrEmpty(input.Uid))
+        {
+            body.Add("mtSettings", new { profile = new { uid = input.Uid } });
+        }
+
+        request.AddJsonBody(body);
 
         var response = await client.ExecuteWithErrorHandling<TranslateTextDto>(request);
         return new TranslateTextResponse(response);
