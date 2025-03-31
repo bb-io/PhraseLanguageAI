@@ -27,13 +27,17 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
         {
             { "consumerId", "BLACKBIRD" },
             { "sourceTexts", new[] { new { key = "text", source = input.Text } } },
-            { "sourceLang", new { code = input.SourceLang } },
             { "targetLang", new { code = input.TargetLang } }
         };
 
         if (!string.IsNullOrEmpty(input.Uid))
         {
             body.Add("mtSettings", new { profile = new { uid = input.Uid } });
+        }
+
+        if (!string.IsNullOrEmpty(input.SourceLang))
+        {
+            body.Add("sourceLang", new { code = input.SourceLang });
         }
 
         request.AddJsonBody(body);
@@ -196,12 +200,16 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
 
         request.AddFile("file", () => fileStream, fileName, contentType);
 
-            var metadata = new Dictionary<string, object>
+        var metadata = new Dictionary<string, object>
         {
-            { "sourceLang", new { code = input.SourceLang } },
             { "targetLangs", new[] { new { code = input.TargetLang } } },
             { "actionTypes", new[] { actionType } }
         };
+
+        if (!string.IsNullOrEmpty(input.SourceLang))
+        {
+            metadata.Add("sourceLang", new { code = input.SourceLang });
+        }
 
         if (!string.IsNullOrEmpty(input.Uid))
         {

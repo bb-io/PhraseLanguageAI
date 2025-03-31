@@ -16,7 +16,7 @@ public class TranslateTests : TestBase
     {
         var actions = new TranslateActions(InvocationContext,FileManager);
 
-        var response = await actions.TranslateText(new TranslateTextInput { SourceLang= "en", TargetLang="es", Text="Hello my dear friend how are you?"});
+        var response = await actions.TranslateText(new TranslateTextInput { TargetLang="es", Text="Hello my dear friend how are you? This is a text that should be longer than 50 characters."});
 
         Console.WriteLine($"{response.SourceLang} - {response.TargetLang} - {response.TranslatedTexts}");
         Assert.IsNotNull(response);
