@@ -200,12 +200,22 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
 
         request.AddFile("file", () => fileStream, fileName, contentType);
 
-        var metadata = new
+            var metadata = new Dictionary<string, object>
         {
-            sourceLang = new { code = input.SourceLang },
-            targetLangs = new[] { new { code = input.TargetLang } },
-            actionTypes = new[] { actionType },
+            { "sourceLang", new { code = input.SourceLang } },
+            { "targetLangs", new[] { new { code = input.TargetLang } } },
+            { "actionTypes", new[] { actionType } }
         };
+
+        if (!string.IsNullOrEmpty(input.Uid))
+        {
+            metadata.Add("mtSettings", new
+            {
+                usePhraseMTSettings = true,
+                profile = new { uid = input.Uid }
+            });
+        }
+
         var metadataJson = System.Text.Json.JsonSerializer.Serialize(metadata);
         var metadataBytes = System.Text.Encoding.UTF8.GetBytes(metadataJson);
 
