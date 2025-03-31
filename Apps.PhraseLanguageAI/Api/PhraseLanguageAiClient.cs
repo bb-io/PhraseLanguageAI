@@ -1,6 +1,8 @@
+using System.Linq;
 using System.Net;
 using Apps.Appname.Constants;
 using Apps.PhraseLanguageAI.Models;
+using Apps.PhraseLanguageAI.Models.Errors;
 using Blackbird.Applications.Sdk.Common.Authentication;
 using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Utils.RestSharp;
@@ -64,10 +66,25 @@ public class PhraseLanguageAiClient : BlackBirdRestClient
     {
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
-            throw new PluginApplicationException("You are unauthorized to use Phrase Language AI. Please validate your credentials.");
+            return new PluginApplicationException("You are unauthorized to use Phrase Language AI. Please validate your credentials.");
         }
-        throw new PluginApplicationException(response.Content);
+
+        try
+        {
+            var error = JsonConvert.DeserializeObject<PhraseError>(response.Content, JsonSettings);
+            if (error.Arguments.Count > 0)
+            {
+                return new PluginApplicationException(string.Join(' ', error.Arguments.Select(x => x.Value)));
+            }
+            return new PluginApplicationException(error.Title);
+            
+        } catch(Exception ex)
+        {
+            return new PluginApplicationException(response.Content);
+        }
+        
     }
+
     private static Uri GetUri(IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders)
     {
         var url = authenticationCredentialsProviders.First(p => p.KeyName == "url").Value;
