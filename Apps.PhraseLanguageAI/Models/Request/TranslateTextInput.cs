@@ -10,7 +10,7 @@ namespace Apps.PhraseLanguageAI.Models.Request
     {
         public string Text { get; set; }
 
-        [Display("Source language")]
+        [Display("Source language", Description = "Optional and can be autodetected only if the text is longer than 50 characters.")]
         [StaticDataSource(typeof(LanguageCodesHandler))]
         public string? SourceLang { get; set; }
 
