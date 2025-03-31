@@ -14,17 +14,6 @@ public class ConnectionValidator : IConnectionValidator
         {
             var client = new PhraseLanguageAiClient(authenticationCredentialsProviders);
 
-            var userName = authenticationCredentialsProviders
-               .First(a => a.KeyName == "userName").Value;
-            var password = authenticationCredentialsProviders
-                .First(a => a.KeyName == "password").Value;
-
-            var organizationId = authenticationCredentialsProviders
-               .First(a => a.KeyName == "uid").Value;
-
-            client.Login(userName, password, organizationId);
-
-
             return new ConnectionValidationResponse
             {
                 IsValid = true

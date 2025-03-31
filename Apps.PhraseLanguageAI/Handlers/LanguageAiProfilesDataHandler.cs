@@ -10,14 +10,9 @@ public class LanguageAiProfilesDataHandler(InvocationContext invocationContext) 
     public async Task<Dictionary<string, string>> GetDataAsync(DataSourceContext context,
        CancellationToken cancellationToken)
     {
-        var endpoint = "v1/translationProfiles";
-
-        var request = new RestRequest(endpoint, Method.Get);
-
+        var request = new RestRequest("v1/translationProfiles", Method.Get);
         var response = await Client.ExecuteWithErrorHandling<PagedLanguageAiProfilesResponse>(request);
-
         var profiles = response.Content ?? new List<LanguageAiProfile>();
-
         var filtered = profiles
             .Where(x => string.IsNullOrEmpty(context.SearchString)
                         || x.Name.Contains(context.SearchString, StringComparison.OrdinalIgnoreCase));

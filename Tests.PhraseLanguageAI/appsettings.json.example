@@ -2,7 +2,8 @@
     "ConnectionDefinition": {
         "userName": "",
         "password": "",
-        "url": ""
+        "url": "",
+        "uid":  ""
     },
     "TestFolder": "C:\\Users\\..."
 }

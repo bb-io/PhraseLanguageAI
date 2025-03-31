@@ -58,8 +58,6 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
             await Task.Delay(5000);
             var statusResponse = await GetFileTranslationStatus(uid);
 
-            //Console.WriteLine("Status Response JSON: " + JsonConvert.SerializeObject(statusResponse, Formatting.Indented));
-
             if (statusResponse.Actions != null &&
                 statusResponse.Actions.Any(a => a.Results != null && a.Results.Any(r => r.Status == "FAILED")))
             {
@@ -92,8 +90,6 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
         {
             await Task.Delay(5000);
             var statusResponse = await GetFileTranslationStatus(uid);
-
-            //Console.WriteLine("Status Response JSON: " + JsonConvert.SerializeObject(statusResponse, Formatting.Indented));
 
             if (statusResponse.Actions != null &&
                 statusResponse.Actions.Any(a => a.Results != null && a.Results.Any(r => r.Status == "FAILED")))

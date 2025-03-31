@@ -19,9 +19,9 @@ public class PhraseLanguageAiClient : BlackBirdRestClient
     {
         var userName = creds.First(p => p.KeyName == CredsNames.UserName).Value;
         var password = creds.First(p => p.KeyName == CredsNames.Password).Value;
-        var projectId = creds.First(p => p.KeyName == CredsNames.OrganizationId).Value;
+        var organizationId = creds.First(p => p.KeyName == CredsNames.OrganizationId).Value;
 
-        var token = Login(userName, password,projectId);
+        var token = Login(userName, password, organizationId);
 
         this.AddDefaultHeader("Authorization", $"Bearer {token}");
     }
@@ -62,6 +62,10 @@ public class PhraseLanguageAiClient : BlackBirdRestClient
 
     protected override Exception ConfigureErrorException(RestResponse response)
     {
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            throw new PluginApplicationException("You are unauthorized to use Phrase Language AI. Please validate your credentials.");
+        }
         throw new PluginApplicationException(response.Content);
     }
     private static Uri GetUri(IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders)
@@ -70,30 +74,21 @@ public class PhraseLanguageAiClient : BlackBirdRestClient
         return new(url.TrimEnd('/'));
     }
 
-    public string Login(string userName, string password, string projectId)
+    public string Login(string userName, string password, string organizationId)
     {
         var request = new RestRequest("v1/auth/login", Method.Post);
 
         request.AddJsonBody(new
         {
-            userName = userName,
-            password = password,
+            userName,
+            password,
             organization = new
             {
-                uid = projectId
+                uid = organizationId
             }
         });
 
-        TokenResponse response;
-        try
-        {
-            response = this.ExecuteWithErrorHandling<TokenResponse>(request)
-                           .GetAwaiter().GetResult();
-        }
-        catch (Exception ex)
-        {
-            throw new PluginApplicationException("Error logging in", ex);
-        }
+        var response = this.ExecuteWithErrorHandling<TokenResponse>(request).GetAwaiter().GetResult();
 
         if (response?.Token == null)
             throw new PluginApplicationException("No token returned from login response.");

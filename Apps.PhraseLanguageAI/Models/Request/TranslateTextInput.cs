@@ -12,7 +12,7 @@ namespace Apps.PhraseLanguageAI.Models.Request
 
         [Display("Source language")]
         [StaticDataSource(typeof(LanguageCodesHandler))]
-        public string SourceLang { get; set; }
+        public string? SourceLang { get; set; }
 
 
         [Display("Target language")]
