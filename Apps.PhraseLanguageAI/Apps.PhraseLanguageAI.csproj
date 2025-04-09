@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         <Product>Phrase Language AI [Beta]</Product>
         <Description>The MT service from Phrase</Description>
-        <Version>1.0.12</Version>
+        <Version>1.0.13</Version>
         <AssemblyName>Apps.PhraseLanguageAI</AssemblyName>
     </PropertyGroup>
 
