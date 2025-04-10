@@ -80,7 +80,7 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
         return new FileResponse { File = downloadedFile, Uid = uid, };
     }
 
-    [Action("Get quality estimation", Description = "Get quality estimation of translation file")]
+    [Action("Translate file with quality estimation", Description = "Translate file with quality estimation")]
     public async Task<TranslationScoreResponse> TranslateFileWithQualityEstimation([ActionParameter] TranslateFileInput input)
     {
         var originalFileName = input.File.Name;
@@ -108,8 +108,8 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
         }
 
         var score = await GetTranslationScore(uid, "QUALITY_ESTIMATION", input.TargetLang);
-
-        return new TranslationScoreResponse { Score = score.Score, Uid = uid };
+        var file = await DownloadFileTranslation(uid, "MT_GENERIC_PRETRANSLATE", input.TargetLang, originalFileName);
+        return new TranslationScoreResponse { Score = score.Score, Uid = uid, File=file };
     }
 
 

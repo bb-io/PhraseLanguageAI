@@ -6,7 +6,7 @@ Blackbird is the new automation backbone for the language technology industry. B
 
 <!-- begin docs -->
 
-[Phrase Language AI](https://support.phrase.com/hc/en-us/articles/5709660879516-Phrase-Language-AI-TMS) offers a machine translation (MT) engine capable of providing high-quality translations across multiple languages and ability to understand context. It offers a  machine translation (MT) engine capable of providing high-quality translations across multiple languages and ability to understand context.
+[Phrase Language AI](https://support.phrase.com/hc/en-us/articles/5709660879516-Phrase-Language-AI-TMS) offers a machine translation (MT) engine capable of providing high-quality translations across multiple languages and ability to understand context.
 Phrase Language AI can be used for raw machine translation workflows that require high volumes of translation without any post-editing steps.
 The minimum requirement for using Phrase Language AI via API is the Phrase Portal user role.
 Phrase Language AI enables file-based translation for the following file types: `.DOCX`, `.TXT`, `.XLSX`, `.CSV`, `.PPTX`, `.HTM/.HTML`, `.XML`, `.JSON`, `.MD`, `.XLF/.XLIFF`, `.SDLXLIFF`.
@@ -55,14 +55,17 @@ Domains were created automatically using an AI-powered analysis of documents. An
 
 Before you can connect you need to make sure that:
 
-- You have a Phrase Language AI account.
+- You have a Phrase Language AI [account.](https://phrase.com/)
+- You have [organization created](https://support.phrase.com/hc/en-us/articles/6091807042076-Phrase-Platform-Organizations)
+- You need to get [organization ID](Images/README/Option1.png) 
+- You can also get [organization ID](Images/README/Option2.png) 
 
 ## Connecting
 
 1. Navigate to Apps, and identify the Phrase Language AI app. You can use search to find it.
 2. Click _Add Connection_.
 3. Name your connection for future reference e.g. 'My Phrase Language AI connection'.
-4. Fill in the User name field and Password to your Phrase Language AI account and choose the data center to use.
+4. Fill in the User name field and Password to your Phrase Language AI account, choose the data center to use and fill the Organization ID.
 5. Click _Connect_.
 
 ## Actions
@@ -70,8 +73,8 @@ Before you can connect you need to make sure that:
 ### Translation 
 
 - **Translate text** Translates text from source language to target language
-- **Translate file** Translate a file
-- **Get quality estimation** Get quality estimation of a translation
+- **Translate file** Translates a file
+- **Get quality estimation** Gets quality estimation of a translation
 
 ## Feedback
 

@@ -58,7 +58,7 @@ public class TranslateTests : TestBase
     {
         var actions = new TranslateActions(InvocationContext, FileManager);
 
-        var response = await actions.DownloadFileTranslation("0rWrCIa3kvMCsW1LCGE0K7", "MT_GENERIC_PRETRANSLATE", "es", "test.html");
+        var response = await actions.DownloadFileTranslation("9S0QGXC6ANkz42EI4OnqC0", "MT_GENERIC_PRETRANSLATE", "es", "test.html");
         Assert.IsNotNull(response);
     }
 
@@ -72,7 +72,7 @@ public class TranslateTests : TestBase
             TargetLang = "es",
             File = new FileReference
             {
-                Name = "test.html"
+                Name = "test.docx"
             }
         };
 
@@ -88,11 +88,11 @@ public class TranslateTests : TestBase
         var actions = new TranslateActions(InvocationContext, FileManager);
         var fileInput = new TranslateFileInput
         {
-            SourceLang = "en",
+            SourceLang = "aa",
             TargetLang = "es",
             File = new FileReference
             {
-                Name = "test.txt"
+                Name = "test.docx"
             }
         };
 

@@ -1,4 +1,5 @@
 ﻿using Blackbird.Applications.Sdk.Common;
+using Blackbird.Applications.Sdk.Common.Files;
 using Newtonsoft.Json;
 
 namespace Apps.PhraseLanguageAI.Models.Response
@@ -10,5 +11,8 @@ namespace Apps.PhraseLanguageAI.Models.Response
 
         [Display("Operation ID")]
         public string Uid { get; set; }
+
+        [Display("File")]
+        public FileReference File { get; set; }
     }
 }
