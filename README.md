@@ -74,7 +74,7 @@ Before you can connect you need to make sure that:
 
 - **Translate text** Translates text from source language to target language
 - **Translate file** Translates a file
-- **Get quality estimation** Gets quality estimation of a translation
+- **Translate file with quality estimation** Gets quality estimation of a translation
 
 ## Feedback
 
