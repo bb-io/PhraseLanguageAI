@@ -57,8 +57,12 @@ Before you can connect you need to make sure that:
 
 - You have a Phrase Language AI [account.](https://phrase.com/)
 - You have [organization created](https://support.phrase.com/hc/en-us/articles/6091807042076-Phrase-Platform-Organizations)
-- You need to get ![organization ID](Images/README/Option1.png) 
-- You can also get ![organization ID](Images/README/Option2.png) 
+- You need to get organizarion ID using one of the ways:
+First - you can find in Enabling SSO settings:
+![organization ID](Images/README/Option1.png) 
+
+Second - you can find in Profile settings:
+![organization ID](Images/README/Option2.png) 
 
 ## Connecting
 
