@@ -77,9 +77,9 @@ Second - you can find in Profile settings:
 
 ### Translation 
 
-- **Translate text** Translates text from source language to target language
-- **Translate file** Translates a file
-- **Translate file with quality estimation** Gets quality estimation of a translation
+- **Translate text** Translates text from source language to target language. Please keep in ming if you use language profile, the source and target languages should be the same as the one in the profile.
+- **Translate file** Translates a file. Please keep in ming if you use language profile, the source and target languages should be the same as the one in the profile.
+- **Translate file with quality estimation** Gets quality estimation of a translation. Please keep in ming if you use language profile, the source and target languages should be the same as the one in the profile.
 
 ## Feedback
 
