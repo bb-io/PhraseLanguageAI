@@ -68,11 +68,12 @@ public class TranslateTests : TestBase
         var actions = new TranslateActions(InvocationContext, FileManager);
         var fileInput = new TranslateFileInput
         {
-            SourceLang = "en",
-            TargetLang = "es",
+            SourceLang = "en_us",
+            TargetLang = "es_419",
+            Uid = "1flsLYJBHVjoly0yokCQta",
             File = new FileReference
             {
-                Name = "test.docx"
+                Name = "weex.html"
             }
         };
 
