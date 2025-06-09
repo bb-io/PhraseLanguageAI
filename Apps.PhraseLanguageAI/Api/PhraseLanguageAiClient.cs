@@ -13,10 +13,11 @@ namespace Apps.Appname.Api;
 
 public class PhraseLanguageAiClient : BlackBirdRestClient
 {
+    private const int MaxTimeout = 900000;
     public PhraseLanguageAiClient(IEnumerable<AuthenticationCredentialsProvider> creds) : base(new()
     {
         BaseUrl = GetUri(creds),
-        MaxTimeout = 180000
+        MaxTimeout = MaxTimeout
     })
     {
         var userName = creds.First(p => p.KeyName == CredsNames.UserName).Value;
