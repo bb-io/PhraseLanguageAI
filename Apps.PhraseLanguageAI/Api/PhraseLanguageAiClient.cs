@@ -34,7 +34,7 @@ public class PhraseLanguageAiClient : BlackBirdRestClient
         var response = await ExecuteAsync(request);
 
         if (response.StatusCode == HttpStatusCode.TooManyRequests ||
-            response.StatusCode == HttpStatusCode.ServiceUnavailable)
+            response.StatusCode == HttpStatusCode.ServiceUnavailable || response.StatusCode == HttpStatusCode.InternalServerError)
         {
             const int scalingFactor = 2;
             var retryAfterMilliseconds = 1000;
