@@ -6,16 +6,22 @@ using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Common.Files;
 using Blackbird.Applications.Sdk.Common.Invocation;
+using Blackbird.Applications.SDK.Blueprints;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
+using Blackbird.Filters.Constants;
+using Blackbird.Filters.Enums;
+using Blackbird.Filters.Extensions;
+using Blackbird.Filters.Transformations;
 using Newtonsoft.Json;
 using RestSharp;
 
 namespace Apps.Appname.Actions;
 
-[ActionList]
+[ActionList("Translation")]
 public class TranslateActions(InvocationContext invocationContext, IFileManagementClient fileManagerClient) : Invocable(invocationContext)
 {
 
+    [BlueprintActionDefinition(BlueprintAction.TranslateText)]
     [Action("Translate text", Description = "Translates text from source language to target language")]
     public async Task<TranslateTextResponse> TranslateText([ActionParameter] TranslateTextInput input)
     {
@@ -27,7 +33,7 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
         {
             { "consumerId", "BLACKBIRD" },
             { "sourceTexts", new[] { new { key = "text", source = input.Text } } },
-            { "targetLang", new { code = input.TargetLang } }
+            { "targetLang", new { code = input.TargetLanguage } }
         };
 
         if (!string.IsNullOrEmpty(input.Uid))
@@ -46,9 +52,23 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
         return new TranslateTextResponse(response);
     }
 
-
-    [Action("Translate file", Description = "Translates file with action type MT_GENERIC_PRETRANSLATE")]
+    [BlueprintActionDefinition(BlueprintAction.TranslateFile)]
+    [Action("Translate", Description = "Translates file with action type MT_GENERIC_PRETRANSLATE")]
     public async Task<FileResponse> TranslateFileGenericPretranslate([ActionParameter] TranslateFileInput input)
+    {
+        var strategy = input.FileTranslationStrategy?.ToLowerInvariant() ?? "plai";
+
+        if (strategy == "blackbird")
+        {
+            return await TranslateWithBlackbird(input);
+        }
+        else // "plai"
+        {
+            return await TranslateWithPhraseLanguageAINative(input);
+        }
+    }
+
+    private async Task<FileResponse> TranslateWithPhraseLanguageAINative(TranslateFileInput input)
     {
         var originalFileName = input.File.Name;
 
@@ -74,11 +94,94 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
                 break;
         }
 
-        var downloadedFile = await DownloadFileTranslation(uid, "MT_GENERIC_PRETRANSLATE", input.TargetLang, originalFileName);
+        var downloadedFile = await DownloadFileTranslation(uid, "MT_GENERIC_PRETRANSLATE", input.TargetLanguage, originalFileName);
         downloadedFile.Name = originalFileName;
 
-        return new FileResponse { File = downloadedFile, Uid = uid, };
+        return new FileResponse { File = downloadedFile, Uid = uid };
     }
+
+    private async Task<FileResponse> TranslateWithBlackbird(TranslateFileInput input)
+    {
+        try
+        {
+            using var stream = await fileManagerClient.DownloadAsync(input.File);
+            var content = await Transformation.Parse(stream, input.File.Name);
+
+            return await HandleInteroperableTransformation(content, input);
+        }
+        catch (Exception e) when (e.Message.Contains("not supported"))
+        {
+            throw new PluginMisconfigurationException(
+                "The file format is not supported by the Blackbird interoperable setting. " +
+                "Try setting the file translation strategy to Phrase Language AI native.");
+        }
+    }
+
+    private async Task<FileResponse> HandleInteroperableTransformation(Transformation content, TranslateFileInput input)
+    {
+        content.SourceLanguage ??= input.SourceLang;
+        content.TargetLanguage ??= input.TargetLanguage;
+
+        if (content.SourceLanguage == null || content.TargetLanguage == null)
+            throw new PluginMisconfigurationException("Source or target language not defined.");
+
+        async Task<IEnumerable<string>> BatchTranslate(IEnumerable<Segment> batch)
+        {
+            var request = new RestRequest("v2/textTranslations", Method.Post);
+
+            var body = new Dictionary<string, object>
+                {
+                    { "consumerId", "BLACKBIRD" },
+                    { "sourceTexts", batch.Select(s => new { key = s.Id, source = s.GetSource() }).ToArray() },
+                    { "targetLang", new { code = input.TargetLanguage ?? content.TargetLanguage } }
+                };
+
+            if (!string.IsNullOrEmpty(input.Uid))
+            {
+                body.Add("mtSettings", new { profile = new { uid = input.Uid } });
+            }
+
+            if (!string.IsNullOrEmpty(input.SourceLang))
+            {
+                body.Add("sourceLang", new { code = input.SourceLang });
+            }
+
+            request.AddJsonBody(body);
+
+            var client = new PhraseLanguageAiClient(InvocationContext.AuthenticationCredentialsProviders);
+
+            var response = await client.ExecuteWithErrorHandling<TranslateTextDto>(request);
+            return response.TranslatedTexts.Select(t => t.Target);
+        }
+
+        var segments = content.GetSegments()
+            .Where(s => !s.IsIgnorbale && s.IsInitial)
+            .ToList();
+
+        var segmentTranslations = await segments.Batch(100).Process(BatchTranslate);
+
+        foreach (var (segment, translatedText) in segmentTranslations)
+        {
+            if (!string.IsNullOrEmpty(translatedText))
+            {
+                segment.SetTarget(translatedText);
+                segment.State = SegmentState.Translated;
+            }
+        }
+
+        if (input.OutputFileHandling == "original")
+        {
+            var targetContent = content.Target();
+            var outFile = await fileManagerClient.UploadAsync(targetContent.Serialize().ToStream(),targetContent.OriginalMediaType,targetContent.OriginalName);
+            return new FileResponse { File = outFile, Uid = input.Uid };
+        }
+
+        content.SourceLanguage ??= input.SourceLang;
+        content.TargetLanguage ??= input.TargetLanguage;
+        var xliffFile = await fileManagerClient.UploadAsync(content.Serialize().ToStream(), MediaTypes.Xliff,content.XliffFileName);
+        return new FileResponse { File = xliffFile, Uid = input.Uid };
+    }
+
 
     [Action("Translate file with quality estimation", Description = "Translate file with quality estimation")]
     public async Task<TranslationScoreResponse> TranslateFileWithQualityEstimation([ActionParameter] TranslateFileInput input)
@@ -107,8 +210,8 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
                 break;
         }
 
-        var score = await GetTranslationScore(uid, "QUALITY_ESTIMATION", input.TargetLang);
-        var file = await DownloadFileTranslation(uid, "MT_GENERIC_PRETRANSLATE", input.TargetLang, originalFileName);
+        var score = await GetTranslationScore(uid, "QUALITY_ESTIMATION", input.TargetLanguage);
+        var file = await DownloadFileTranslation(uid, "MT_GENERIC_PRETRANSLATE", input.TargetLanguage, originalFileName);
         return new TranslationScoreResponse { Score = score.Score, Uid = uid, File=file };
     }
 
@@ -202,7 +305,7 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
 
         var metadata = new Dictionary<string, object>
         {
-            { "targetLangs", new[] { new { code = input.TargetLang } } },
+            { "targetLangs", new[] { new { code = input.TargetLanguage } } },
             { "actionTypes", new[] { actionType } }
         };
 
