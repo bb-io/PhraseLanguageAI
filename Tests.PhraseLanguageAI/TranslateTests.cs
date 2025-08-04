@@ -16,9 +16,9 @@ public class TranslateTests : TestBase
     {
         var actions = new TranslateActions(InvocationContext,FileManager);
 
-        var response = await actions.TranslateText(new TranslateTextInput { TargetLang="es", Text="Hello my dear friend how are you? This is a text that should be longer than 50 characters."});
+        var response = await actions.TranslateText(new TranslateTextInput { TargetLanguage = "es", Text="Hello my dear friend how are you? This is a text that should be longer than 50 characters."});
 
-        Console.WriteLine($"{response.SourceLang} - {response.TargetLang} - {response.TranslatedTexts}");
+        Console.WriteLine($"{response.SourceLang} - {response.TargetLang} - {response.TranslatedText}");
         Assert.IsNotNull(response);
     }
 
@@ -29,7 +29,7 @@ public class TranslateTests : TestBase
         var fileInput = new TranslateFileInput
         {
             SourceLang = "en",
-            TargetLang = "es",
+            TargetLanguage = "es",
             File = new FileReference
             {
                 Name = "test.txt"
@@ -69,12 +69,14 @@ public class TranslateTests : TestBase
         var fileInput = new TranslateFileInput
         {
             SourceLang = "en_us",
-            TargetLang = "es_419",
+            TargetLanguage = "es_419",
             Uid = "1flsLYJBHVjoly0yokCQta",
             File = new FileReference
             {
-                Name = "weex.html"
-            }
+                Name = "test.html"
+            },
+            //FileTranslationStrategy = "plai",
+            OutputFileHandling = "original",
         };
 
         var response = await actions.TranslateFileGenericPretranslate(fileInput);
@@ -90,7 +92,7 @@ public class TranslateTests : TestBase
         var fileInput = new TranslateFileInput
         {
             SourceLang = "aa",
-            TargetLang = "es",
+            TargetLanguage = "es",
             File = new FileReference
             {
                 Name = "test.docx"

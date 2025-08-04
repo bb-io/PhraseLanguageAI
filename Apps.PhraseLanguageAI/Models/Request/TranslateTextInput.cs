@@ -3,10 +3,11 @@ using Apps.Appname.Handlers.Static;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Dictionaries;
 using Blackbird.Applications.Sdk.Common.Dynamic;
+using Blackbird.Applications.SDK.Blueprints.Interfaces.Translate;
 
 namespace Apps.PhraseLanguageAI.Models.Request
 {
-    public class TranslateTextInput
+    public class TranslateTextInput : ITranslateTextInput
     {
         public string Text { get; set; }
 
@@ -17,7 +18,7 @@ namespace Apps.PhraseLanguageAI.Models.Request
 
         [Display("Target language")]
         [StaticDataSource(typeof(LanguageCodesHandler))]
-        public string TargetLang { get; set; }
+        public string TargetLanguage { get; set; }
 
         [Display("Language profile ID")]
         [DataSource(typeof(LanguageAiProfilesDataHandler))]

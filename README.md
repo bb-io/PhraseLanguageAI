@@ -78,7 +78,7 @@ Second - you can find in Profile settings:
 ### Translation 
 
 - **Translate text** Translates text from source language to target language. Please keep in ming if you use language profile, the source and target languages should be the same as the one in the profile.
-- **Translate file** Translates a file. Please keep in ming if you use language profile, the source and target languages should be the same as the one in the profile.
+- **Translate** translates the input file. There is 2 strategies 'Phrase Labguage AI' and 'Blackbird'. 'Phrase Labguage AI' strategy uses native functionality. 'Blackbird' strategy uses Blackbird's translation the file and it is the default, to change it, please use property 'File Translation Strategy'. 
 - **Translate file with quality estimation** Gets quality estimation of a translation. Please keep in ming if you use language profile, the source and target languages should be the same as the one in the profile.
 
 ## Feedback
