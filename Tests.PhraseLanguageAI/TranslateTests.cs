@@ -1,9 +1,8 @@
-﻿using Apps.Appname.Actions;
-using Apps.Appname.Handlers;
+﻿using Apps.Appname.Handlers;
+using Apps.PhraseLanguageAI.Actions;
 using Apps.PhraseLanguageAI.Models.Request;
 using Blackbird.Applications.Sdk.Common.Dynamic;
 using Blackbird.Applications.Sdk.Common.Files;
-using Newtonsoft.Json;
 using Tests.Appname.Base;
 
 namespace Tests.Appname;
@@ -23,7 +22,7 @@ public class TranslateTests : TestBase
     }
 
     [TestMethod]
-    public async Task UplloadFileGeneric_IsSuccess()
+    public async Task UploadFileGeneric_IsSuccess()
     {
         var actions = new TranslateActions(InvocationContext, FileManager);
         var fileInput = new TranslateFileInput
@@ -36,7 +35,7 @@ public class TranslateTests : TestBase
             }
         };
 
-        var response = await actions.UploadFileForTranslation(fileInput, "QUALITY_ESTIMATION");
+        var response = await actions.UploadFileForTranslation(fileInput, "QUALITY_ESTIMATION", null);
 
         Console.WriteLine($"{response.Uid} - {response.Actions} - ");
         Assert.IsNotNull(response);
@@ -70,20 +69,48 @@ public class TranslateTests : TestBase
         {
             SourceLang = "en_us",
             TargetLanguage = "es_419",
-            Uid = "1flsLYJBHVjoly0yokCQta",
+            Uid = "QC7pl7aJ7jaq02ypFz9ZR4",
             File = new FileReference
             {
                 Name = "test.html"
             },
-            //FileTranslationStrategy = "plai",
+            FileTranslationStrategy = "plai",
             OutputFileHandling = "original",
         };
 
-        var response = await actions.TranslateFileGenericPretranslate(fileInput);
+        var response = await actions.TranslateFileGenericPretranslate(fileInput, null);
 
         Assert.IsNotNull(response);
     }
+    
+    [TestMethod]
+    public async Task TranslateFileGenericPretranslate_WithTransMemories_IsSuccess()
+    {
+        var actions = new TranslateActions(InvocationContext, FileManager);
+        var fileInput = new TranslateFileInput
+        {
+            SourceLang = "en",
+            TargetLanguage = "fi_fi",
+            //Uid = "QC7pl7aJ7jaq02ypFz9ZR4",
+            File = new FileReference
+            {
+                Name = "test.html"
+            },
+            FileTranslationStrategy = "plai",
+            OutputFileHandling = "original",
+        };
+        var transMemory = new TransMemoriesConfig
+        {
+            TargetLanguage = "fi_fi",
+            TransMemoryUid = "TC0zd28l9IQ9tG6uYkiIt3",
+            TmSourceLanguage = "en",
+            TmTargetLanguage = "fi_fi"
+        };
 
+        var response = await actions.TranslateFileGenericPretranslate(fileInput, transMemory);
+
+        Assert.IsNotNull(response);
+    }
 
     [TestMethod]
     public async Task GetFileScore_IsSuccess()
@@ -99,7 +126,7 @@ public class TranslateTests : TestBase
             }
         };
 
-        var response = await actions.TranslateFileWithQualityEstimation(fileInput);
+        var response = await actions.TranslateFileWithQualityEstimation(fileInput, null);
 
         Console.WriteLine($"{response.Uid} - {response.Score}");
         Assert.IsNotNull(response);
@@ -116,5 +143,4 @@ public class TranslateTests : TestBase
             Console.WriteLine($"{profile.Key} - {profile.Value}");
         }
     }
-
 }

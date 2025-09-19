@@ -1,4 +1,5 @@
-﻿using Apps.Appname.Api;
+﻿using Apps.Appname;
+using Apps.Appname.Api;
 using Apps.PhraseLanguageAI.Models.Request;
 using Apps.PhraseLanguageAI.Models.Response;
 using Blackbird.Applications.Sdk.Common;
@@ -15,7 +16,7 @@ using Blackbird.Filters.Transformations;
 using Newtonsoft.Json;
 using RestSharp;
 
-namespace Apps.Appname.Actions;
+namespace Apps.PhraseLanguageAI.Actions;
 
 [ActionList("Translation")]
 public class TranslateActions(InvocationContext invocationContext, IFileManagementClient fileManagerClient) : Invocable(invocationContext)
@@ -54,7 +55,8 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
 
     [BlueprintActionDefinition(BlueprintAction.TranslateFile)]
     [Action("Translate", Description = "Translates file with action type MT_GENERIC_PRETRANSLATE")]
-    public async Task<FileResponse> TranslateFileGenericPretranslate([ActionParameter] TranslateFileInput input)
+    public async Task<FileResponse> TranslateFileGenericPretranslate([ActionParameter] TranslateFileInput input,
+        [ActionParameter] TransMemoriesConfig? memories)
     {
         var strategy = input.FileTranslationStrategy?.ToLowerInvariant() ?? "plai";
 
@@ -64,15 +66,15 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
         }
         else // "plai"
         {
-            return await TranslateWithPhraseLanguageAINative(input);
+            return await TranslateWithPhraseLanguageAINative(input, memories);
         }
     }
 
-    private async Task<FileResponse> TranslateWithPhraseLanguageAINative(TranslateFileInput input)
+    private async Task<FileResponse> TranslateWithPhraseLanguageAINative(TranslateFileInput input, TransMemoriesConfig? memories)
     {
         var originalFileName = input.File.Name;
 
-        var uploadResponse = await UploadFileForTranslation(input, "MT_GENERIC_PRETRANSLATE");
+        var uploadResponse = await UploadFileForTranslation(input, "MT_GENERIC_PRETRANSLATE", memories);
         var uid = uploadResponse.Uid;
         if (string.IsNullOrEmpty(uid))
             throw new PluginApplicationException("No UID returned after file upload.");
@@ -184,11 +186,12 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
 
 
     [Action("Translate file with quality estimation", Description = "Translate file with quality estimation")]
-    public async Task<TranslationScoreResponse> TranslateFileWithQualityEstimation([ActionParameter] TranslateFileInput input)
+    public async Task<TranslationScoreResponse> TranslateFileWithQualityEstimation([ActionParameter] TranslateFileInput input,
+        [ActionParameter] TransMemoriesConfig? memories)
     {
         var originalFileName = input.File.Name;
 
-        var uploadResponse = await UploadFileForTranslation(input, "QUALITY_ESTIMATION");
+        var uploadResponse = await UploadFileForTranslation(input, "QUALITY_ESTIMATION", memories);
         var uid = uploadResponse.Uid;
         if (string.IsNullOrEmpty(uid))
             throw new PluginApplicationException("No UID returned after file upload.");
@@ -285,7 +288,7 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
         return uploaded;
     }
 
-    public async Task<FileTranslationResponse> UploadFileForTranslation(TranslateFileInput input, string actionType)
+    public async Task<FileTranslationResponse> UploadFileForTranslation(TranslateFileInput input, string actionType, TransMemoriesConfig? memories)
     {
         var client = new PhraseLanguageAiClient(InvocationContext.AuthenticationCredentialsProviders);
 
@@ -306,8 +309,41 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
         var metadata = new Dictionary<string, object>
         {
             { "targetLangs", new[] { new { code = input.TargetLanguage } } },
-            { "actionTypes", new[] { actionType } }
+            { "actionTypes", new[] { actionType } },
         };
+
+        if (memories != null)
+        {
+            var transMemoriesConfig = new[]
+            {
+                new {
+                    targetLang = new
+                    {
+                        code = memories.TargetLanguage
+                    },
+                    transMemories = new[]
+                    {
+                        new
+                        {
+                            transMemory = new
+                            {
+                                uid = memories.TransMemoryUid
+                            },
+                            tmSourceLocale = new
+                            {
+                                code = memories.TmSourceLanguage
+                            },
+                            tmTargetLocale = new
+                            {
+                                code = memories.TmTargetLanguage
+                            }
+                        }
+                    }
+                }
+            };
+
+            metadata.Add("transMemoriesConfig", transMemoriesConfig);
+        }
 
         if (!string.IsNullOrEmpty(input.SourceLang))
         {
