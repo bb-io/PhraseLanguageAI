@@ -65,29 +65,7 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
         }
         else // "plai"
         {
-            ValidateTransMemoriesProperties(memories);
             return await TranslateWithPhraseLanguageAINative(input, memories);
-        }
-    }
-
-    private static void ValidateTransMemoriesProperties(TransMemoriesConfig memories)
-    {
-        bool allProvided = !string.IsNullOrWhiteSpace(memories.TransMemoryUid) &&
-                           !string.IsNullOrWhiteSpace(memories.TargetLanguage) &&
-                           !string.IsNullOrWhiteSpace(memories.TmSourceLanguage) &&
-                           !string.IsNullOrWhiteSpace(memories.TmTargetLanguage);
-
-        bool allEmpty = string.IsNullOrWhiteSpace(memories.TransMemoryUid) &&
-                        string.IsNullOrWhiteSpace(memories.TargetLanguage) &&
-                        string.IsNullOrWhiteSpace(memories.TmSourceLanguage) &&
-                        string.IsNullOrWhiteSpace(memories.TmTargetLanguage);
-
-        if (!(allProvided || allEmpty)) 
-        {
-            throw new PluginMisconfigurationException(
-                "If you want to specify a translation memory, you must fill in all fields: " +
-                "'Translation memory UID', 'Target language', 'Translation memory source language', 'Translation memory target language'."
-            );
         }
     }
 
@@ -340,7 +318,7 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
                 new {
                     targetLang = new
                     {
-                        code = memories.TargetLanguage
+                        code = input.TargetLanguage
                     },
                     transMemories = new[]
                     {
@@ -352,11 +330,11 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
                             },
                             tmSourceLocale = new
                             {
-                                code = memories.TmSourceLanguage
+                                code = input.SourceLang
                             },
                             tmTargetLocale = new
                             {
-                                code = memories.TmTargetLanguage
+                                code = input.TargetLanguage
                             }
                         }
                     }

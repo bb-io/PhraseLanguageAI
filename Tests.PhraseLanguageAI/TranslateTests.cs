@@ -2,7 +2,6 @@
 using Apps.Appname.Handlers;
 using Apps.PhraseLanguageAI.Models.Request;
 using Blackbird.Applications.Sdk.Common.Dynamic;
-using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Common.Files;
 using Tests.Appname.Base;
 
@@ -63,7 +62,7 @@ public class TranslateTests : TestBase
     }
 
     [TestMethod]
-    public async Task TranslateFileGenericPretranslate_NoTransMemories_IsSuccess()
+    public async Task TranslateFileGenericPretranslate_WithoutTransMemories_IsSuccess()
     {
         // Arrange
         var actions = new TranslateActions(InvocationContext, FileManager);
@@ -106,10 +105,7 @@ public class TranslateTests : TestBase
         };
         var transMemory = new TransMemoriesConfig
         {
-            TargetLanguage = "fi_fi",
             TransMemoryUid = "TC0zd28l9IQ9tG6uYkiIt3",
-            TmSourceLanguage = "en",
-            TmTargetLanguage = "fi_fi"
         };
 
         // Act
@@ -117,35 +113,6 @@ public class TranslateTests : TestBase
 
         // Assert
         Assert.IsNotNull(response);
-    }
-
-    [TestMethod]
-    public async Task TranslateFileGenericPretranslate_WithPartialTransMemories_ThrowsException()
-    {
-        // Arrange
-        var actions = new TranslateActions(InvocationContext, FileManager);
-        var fileInput = new TranslateFileInput
-        {
-            SourceLang = "en",
-            TargetLanguage = "fi_fi",
-            File = new FileReference
-            {
-                Name = "test.html"
-            },
-            FileTranslationStrategy = "plai",
-            OutputFileHandling = "original",
-        };
-        var partialTransMemory = new TransMemoriesConfig
-        {
-            TargetLanguage = "fi_fi",
-            TmSourceLanguage = "en",
-            TmTargetLanguage = "fi_fi"
-        };
-
-        // Act & Assert
-        await Assert.ThrowsExceptionAsync<PluginMisconfigurationException>(
-            async () => await actions.TranslateFileGenericPretranslate(fileInput, partialTransMemory
-        ));
     }
 
     [TestMethod]
