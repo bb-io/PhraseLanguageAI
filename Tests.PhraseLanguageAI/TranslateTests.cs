@@ -1,7 +1,8 @@
-﻿using Apps.Appname.Handlers;
-using Apps.PhraseLanguageAI.Actions;
+﻿using Apps.Appname.Actions;
+using Apps.Appname.Handlers;
 using Apps.PhraseLanguageAI.Models.Request;
 using Blackbird.Applications.Sdk.Common.Dynamic;
+using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Common.Files;
 using Tests.Appname.Base;
 
@@ -62,8 +63,9 @@ public class TranslateTests : TestBase
     }
 
     [TestMethod]
-    public async Task TranslateFileGenericPretranslate_IsSuccess()
+    public async Task TranslateFileGenericPretranslate_NoTransMemories_IsSuccess()
     {
+        // Arrange
         var actions = new TranslateActions(InvocationContext, FileManager);
         var fileInput = new TranslateFileInput
         {
@@ -77,21 +79,24 @@ public class TranslateTests : TestBase
             FileTranslationStrategy = "plai",
             OutputFileHandling = "original",
         };
+        var emptyTransMemories = new TransMemoriesConfig { };
 
-        var response = await actions.TranslateFileGenericPretranslate(fileInput, null);
+        // Act
+        var response = await actions.TranslateFileGenericPretranslate(fileInput, emptyTransMemories);
 
+        // Assert
         Assert.IsNotNull(response);
     }
     
     [TestMethod]
     public async Task TranslateFileGenericPretranslate_WithTransMemories_IsSuccess()
     {
+        // Arrange
         var actions = new TranslateActions(InvocationContext, FileManager);
         var fileInput = new TranslateFileInput
         {
             SourceLang = "en",
             TargetLanguage = "fi_fi",
-            //Uid = "QC7pl7aJ7jaq02ypFz9ZR4",
             File = new FileReference
             {
                 Name = "test.html"
@@ -107,9 +112,40 @@ public class TranslateTests : TestBase
             TmTargetLanguage = "fi_fi"
         };
 
+        // Act
         var response = await actions.TranslateFileGenericPretranslate(fileInput, transMemory);
 
+        // Assert
         Assert.IsNotNull(response);
+    }
+
+    [TestMethod]
+    public async Task TranslateFileGenericPretranslate_WithPartialTransMemories_ThrowsException()
+    {
+        // Arrange
+        var actions = new TranslateActions(InvocationContext, FileManager);
+        var fileInput = new TranslateFileInput
+        {
+            SourceLang = "en",
+            TargetLanguage = "fi_fi",
+            File = new FileReference
+            {
+                Name = "test.html"
+            },
+            FileTranslationStrategy = "plai",
+            OutputFileHandling = "original",
+        };
+        var partialTransMemory = new TransMemoriesConfig
+        {
+            TargetLanguage = "fi_fi",
+            TmSourceLanguage = "en",
+            TmTargetLanguage = "fi_fi"
+        };
+
+        // Act & Assert
+        await Assert.ThrowsExceptionAsync<PluginMisconfigurationException>(
+            async () => await actions.TranslateFileGenericPretranslate(fileInput, partialTransMemory
+        ));
     }
 
     [TestMethod]

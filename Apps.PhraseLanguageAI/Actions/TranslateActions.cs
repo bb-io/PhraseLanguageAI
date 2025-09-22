@@ -1,5 +1,4 @@
-﻿using Apps.Appname;
-using Apps.Appname.Api;
+﻿using Apps.Appname.Api;
 using Apps.PhraseLanguageAI.Models.Request;
 using Apps.PhraseLanguageAI.Models.Response;
 using Blackbird.Applications.Sdk.Common;
@@ -16,7 +15,7 @@ using Blackbird.Filters.Transformations;
 using Newtonsoft.Json;
 using RestSharp;
 
-namespace Apps.PhraseLanguageAI.Actions;
+namespace Apps.Appname.Actions;
 
 [ActionList("Translation")]
 public class TranslateActions(InvocationContext invocationContext, IFileManagementClient fileManagerClient) : Invocable(invocationContext)
@@ -56,7 +55,7 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
     [BlueprintActionDefinition(BlueprintAction.TranslateFile)]
     [Action("Translate", Description = "Translates file with action type MT_GENERIC_PRETRANSLATE")]
     public async Task<FileResponse> TranslateFileGenericPretranslate([ActionParameter] TranslateFileInput input,
-        [ActionParameter] TransMemoriesConfig? memories)
+        [ActionParameter] TransMemoriesConfig memories)
     {
         var strategy = input.FileTranslationStrategy?.ToLowerInvariant() ?? "plai";
 
@@ -66,11 +65,33 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
         }
         else // "plai"
         {
+            ValidateTransMemoriesProperties(memories);
             return await TranslateWithPhraseLanguageAINative(input, memories);
         }
     }
 
-    private async Task<FileResponse> TranslateWithPhraseLanguageAINative(TranslateFileInput input, TransMemoriesConfig? memories)
+    private static void ValidateTransMemoriesProperties(TransMemoriesConfig memories)
+    {
+        bool allProvided = !string.IsNullOrWhiteSpace(memories.TransMemoryUid) &&
+                           !string.IsNullOrWhiteSpace(memories.TargetLanguage) &&
+                           !string.IsNullOrWhiteSpace(memories.TmSourceLanguage) &&
+                           !string.IsNullOrWhiteSpace(memories.TmTargetLanguage);
+
+        bool allEmpty = string.IsNullOrWhiteSpace(memories.TransMemoryUid) &&
+                        string.IsNullOrWhiteSpace(memories.TargetLanguage) &&
+                        string.IsNullOrWhiteSpace(memories.TmSourceLanguage) &&
+                        string.IsNullOrWhiteSpace(memories.TmTargetLanguage);
+
+        if (!(allProvided || allEmpty)) 
+        {
+            throw new PluginMisconfigurationException(
+                "If you want to specify a translation memory, you must fill in all fields: " +
+                "'Translation memory UID', 'Target language', 'Translation memory source language', 'Translation memory target language'."
+            );
+        }
+    }
+
+    private async Task<FileResponse> TranslateWithPhraseLanguageAINative(TranslateFileInput input, TransMemoriesConfig memories)
     {
         var originalFileName = input.File.Name;
 
@@ -288,7 +309,7 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
         return uploaded;
     }
 
-    public async Task<FileTranslationResponse> UploadFileForTranslation(TranslateFileInput input, string actionType, TransMemoriesConfig? memories)
+    public async Task<FileTranslationResponse> UploadFileForTranslation(TranslateFileInput input, string actionType, TransMemoriesConfig memories)
     {
         var client = new PhraseLanguageAiClient(InvocationContext.AuthenticationCredentialsProviders);
 
@@ -312,7 +333,7 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
             { "actionTypes", new[] { actionType } },
         };
 
-        if (memories != null)
+        if (memories.TransMemoryUid != null)
         {
             var transMemoriesConfig = new[]
             {
