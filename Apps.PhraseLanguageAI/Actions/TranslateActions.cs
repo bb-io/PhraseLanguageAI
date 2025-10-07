@@ -97,7 +97,7 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
         while (true)
         {
             polls++;
-            //await Task.Delay(5000);  // Used for large files, and to prevent many requests
+            await Task.Delay(2000);  // Used for large files, and to prevent many requests
 
             var swPoll = Stopwatch.StartNew();
             var statusResponse = await GetFileTranslationStatus(uid);
