@@ -14,6 +14,8 @@ using Blackbird.Filters.Extensions;
 using Blackbird.Filters.Transformations;
 using Newtonsoft.Json;
 using RestSharp;
+using System.Diagnostics;
+using static Blackbird.Applications.SDK.Blueprints.BlueprintIcons;
 
 namespace Apps.Appname.Actions;
 
@@ -57,15 +59,21 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
     public async Task<FileResponse> TranslateFileGenericPretranslate([ActionParameter] TranslateFileInput input,
         [ActionParameter] TransMemoriesConfig memories)
     {
-        var strategy = input.FileTranslationStrategy?.ToLowerInvariant() ?? "plai";
+        var swTotal = Stopwatch.StartNew();
+        InvocationContext.Logger?.LogInformation("[PLAI] Translate.start | strategy={0} | file='{1}' | src={2} | trg={3}",
+            new object?[] { input.FileTranslationStrategy ?? "plai", input.File?.Name, input.SourceLang ?? "-", input.TargetLanguage ?? "-" });
 
-        if (strategy == "blackbird")
+        try
         {
-            return await TranslateWithBlackbird(input);
+            var strategy = input.FileTranslationStrategy?.ToLowerInvariant() ?? "plai";
+            return strategy == "blackbird"
+                ? await TranslateWithBlackbird(input)
+                : await TranslateWithPhraseLanguageAINative(input, memories);
         }
-        else // "plai"
+        finally
         {
-            return await TranslateWithPhraseLanguageAINative(input, memories);
+            swTotal.Stop();
+            InvocationContext.Logger?.LogInformation("[PLAI] translate.end | totalMs={0}",new object?[] { swTotal.ElapsedMilliseconds });
         }
     }
 
@@ -73,15 +81,28 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
     {
         var originalFileName = input.File.Name;
 
+        var swUpload = Stopwatch.StartNew();
         var uploadResponse = await UploadFileForTranslation(input, "MT_GENERIC_PRETRANSLATE", memories);
+        swUpload.Stop();
+
         var uid = uploadResponse.Uid;
         if (string.IsNullOrEmpty(uid))
             throw new PluginApplicationException("No UID returned after file upload.");
 
+        InvocationContext.Logger?.LogInformation("[PLAI] upload.end | uid={0} | elapsedMs={1}",new object?[] { uid, swUpload.ElapsedMilliseconds });
+
+        var pollTimes = new List<long>();
+        var polls = 0;
+
         while (true)
         {
-            await Task.Delay(5000);
+            polls++;
+            //await Task.Delay(5000);  // Used for large files, and to prevent many requests
+
+            var swPoll = Stopwatch.StartNew();
             var statusResponse = await GetFileTranslationStatus(uid);
+            swPoll.Stop();
+            pollTimes.Add(swPoll.ElapsedMilliseconds);
 
             if (statusResponse.Actions != null &&
                 statusResponse.Actions.Any(a => a.Results != null && a.Results.Any(r => r.Status == "FAILED")))
@@ -93,9 +114,22 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
                          statusResponse.Actions.All(a => a.Results != null && a.Results.All(r => r.Status == "OK"));
             if (allOk)
                 break;
+
+            InvocationContext.Logger?.LogInformation("[PLAI] poll | uid={0} | i={1} | elapsedMs={2} }",new object?[] { uid, polls, swPoll.ElapsedMilliseconds});
         }
 
+        var swDownload = Stopwatch.StartNew();
         var downloadedFile = await DownloadFileTranslation(uid, "MT_GENERIC_PRETRANSLATE", input.TargetLanguage, originalFileName);
+        swDownload.Stop();
+
+        var pollTotal = pollTimes.Sum();
+        var pollAvg = pollTimes.Count > 0 ? (long)pollTimes.Average() : 0L;
+        var pollMax = pollTimes.Count > 0 ? pollTimes.Max() : 0L;
+
+        InvocationContext.Logger?.LogInformation("[PLAI] summary | uid={0} | polls={1} | pollTotalMs={2} | pollAvgMs={3} | pollMaxMs={4} | uploadMs={5} | downloadMs={6} | src={7} | trg={8} | hasTM={9} | hasMT={10}",
+            new object?[] { uid, polls, pollTotal, pollAvg, pollMax, swUpload.ElapsedMilliseconds, swDownload.ElapsedMilliseconds,
+            input.SourceLang ?? "-", input.TargetLanguage ?? "-", memories?.TransMemoryUid!=null, input?.Uid!=null });
+
         downloadedFile.Name = originalFileName;
 
         return new FileResponse { File = downloadedFile, Uid = uid };
