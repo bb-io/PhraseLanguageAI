@@ -94,18 +94,17 @@ public class TranslateTests : TestBase
         var actions = new TranslateActions(InvocationContext, FileManager);
         var fileInput = new TranslateFileInput
         {
-            SourceLang = "en",
-            TargetLanguage = "fi_fi",
+            SourceLang = "en_us",
+            TargetLanguage = "fa",
             File = new FileReference
             {
-                Name = "test.html"
+                Name = "306.html"
             },
-            FileTranslationStrategy = "plai",
-            OutputFileHandling = "original",
+            Uid= "aAyctAOzRwUVcF5L01HKo0"
         };
         var transMemory = new TransMemoriesConfig
         {
-            TransMemoryUid = "TC0zd28l9IQ9tG6uYkiIt3",
+            TransMemoryUid = "Ogji1tYftnORmGyWJHT319",
         };
 
         // Act
