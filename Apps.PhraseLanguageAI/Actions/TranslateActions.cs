@@ -115,7 +115,7 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
             if (allOk)
                 break;
 
-            InvocationContext.Logger?.LogInformation("[PLAI] poll | uid={0} | i={1} | elapsedMs={2} }",new object?[] { uid, polls, swPoll.ElapsedMilliseconds});
+            InvocationContext.Logger?.LogInformation("[PLAI] poll | uid={0} | i={1} | elapsedMs={2}",new object?[] { uid, polls, swPoll.ElapsedMilliseconds});
         }
 
         var swDownload = Stopwatch.StartNew();
