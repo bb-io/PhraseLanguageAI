@@ -65,7 +65,7 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
 
         try
         {
-            var strategy = input.FileTranslationStrategy?.ToLowerInvariant() ?? "plai";
+            var strategy = input.FileTranslationStrategy?.ToLowerInvariant() ?? "blackbird";
             return strategy == "blackbird"
                 ? await TranslateWithBlackbird(input)
                 : await TranslateWithPhraseLanguageAINative(input, memories);
