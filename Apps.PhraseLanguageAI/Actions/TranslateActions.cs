@@ -102,12 +102,11 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
             var swPoll = Stopwatch.StartNew();
             var statusResponse = await GetFileTranslationStatus(uid);
             swPoll.Stop();
-            pollTimes.Add(swPoll.ElapsedMilliseconds);
+            pollTimes.Add(swPoll.ElapsedMilliseconds);    
 
-            if (statusResponse.Actions != null &&
-                statusResponse.Actions.Any(a => a.Results != null && a.Results.Any(r => r.Status == "FAILED")))
-            {
-                throw new PluginApplicationException("File translation failed (status=FAILED).");
+            if (statusResponse.Actions != null && statusResponse.Actions.Any(a => a.Results != null && a.Results.Any(r => r.Status == "ERROR")))
+            {              
+                throw new PluginApplicationException($"File translation failed. status=[ERROR]");
             }
 
             bool allOk = statusResponse.Actions != null &&

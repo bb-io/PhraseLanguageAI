@@ -95,16 +95,16 @@ public class TranslateTests : TestBase
         var fileInput = new TranslateFileInput
         {
             SourceLang = "en_us",
-            TargetLanguage = "fa",
+            TargetLanguage = "ar",
             File = new FileReference
             {
-                Name = "306.html"
+                Name = "WEEX WE-Launch - RZTO (RZTO Token) Listed & 10,000 USDT Airdrops!.html"
             },
-            Uid= "aAyctAOzRwUVcF5L01HKo0"
+            //Uid= "aAyctAOzRwUVcF5L01HKo0"
         };
         var transMemory = new TransMemoriesConfig
         {
-            TransMemoryUid = "Ogji1tYftnORmGyWJHT319",
+            //TransMemoryUid = "H3mIrir42i854ZecHkafg3",
         };
 
         // Act
