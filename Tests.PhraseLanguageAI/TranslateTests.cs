@@ -98,13 +98,14 @@ public class TranslateTests : TestBase
             TargetLanguage = "ar",
             File = new FileReference
             {
-                Name = "WEEX WE-Launch - RZTO (RZTO Token) Listed & 10,000 USDT Airdrops!.html"
+                Name = "to-translate.html"
             },
-            //Uid= "aAyctAOzRwUVcF5L01HKo0"
+            FileTranslationStrategy = "blackbird",
+            Uid= "aAyctAOzRwUVcF5L01HKo0"
         };
         var transMemory = new TransMemoriesConfig
         {
-            //TransMemoryUid = "H3mIrir42i854ZecHkafg3",
+            TransMemoryUid = "H3mIrir42i854ZecHkafg3",
         };
 
         // Act
@@ -132,17 +133,5 @@ public class TranslateTests : TestBase
 
         Console.WriteLine($"{response.Uid} - {response.Score}");
         Assert.IsNotNull(response);
-    }
-
-    [TestMethod]
-    public async Task LanguageProfileReturnsValues()
-    {
-        var action = new LanguageAiProfilesDataHandler(InvocationContext);
-       
-        var response = await action.GetDataAsync(new DataSourceContext { }, CancellationToken.None);
-        foreach (var profile in response)
-        {
-            Console.WriteLine($"{profile.Key} - {profile.Value}");
-        }
     }
 }

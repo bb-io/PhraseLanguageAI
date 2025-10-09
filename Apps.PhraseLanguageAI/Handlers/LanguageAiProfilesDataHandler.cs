@@ -4,10 +4,10 @@ using Blackbird.Applications.Sdk.Common.Invocation;
 using RestSharp;
 
 namespace Apps.Appname.Handlers;
-public class LanguageAiProfilesDataHandler(InvocationContext invocationContext) : Invocable(invocationContext), IAsyncDataSourceHandler
+public class LanguageAiProfilesDataHandler(InvocationContext invocationContext) : Invocable(invocationContext), IAsyncDataSourceItemHandler
 {
 
-    public async Task<Dictionary<string, string>> GetDataAsync(DataSourceContext context,
+    public async Task<IEnumerable<DataSourceItem>> GetDataAsync(DataSourceContext context,
        CancellationToken cancellationToken)
     {
         var request = new RestRequest("v1/translationProfiles", Method.Get);
@@ -17,7 +17,7 @@ public class LanguageAiProfilesDataHandler(InvocationContext invocationContext) 
             .Where(x => string.IsNullOrEmpty(context.SearchString)
                         || x.Name.Contains(context.SearchString, StringComparison.OrdinalIgnoreCase));
 
-        return filtered.ToDictionary(x => x.Uid, x => x.Name);
+        return filtered.Select(x => new DataSourceItem(x.Uid, x.Name));
 
     }
 }

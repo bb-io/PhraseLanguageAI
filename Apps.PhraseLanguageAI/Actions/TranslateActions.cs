@@ -159,14 +159,16 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
         if (content.SourceLanguage == null || content.TargetLanguage == null)
             throw new PluginMisconfigurationException("Source or target language not defined.");
 
-        async Task<IEnumerable<string>> BatchTranslate(IEnumerable<Segment> batch)
+        async Task<IEnumerable<TranslatedText>> BatchTranslate(IEnumerable<(Unit Unit, Segment Segment)> batch)
         {
             var request = new RestRequest("v2/textTranslations", Method.Post);
+
+            var idSegments = batch.Select((x, i) => new { Id = i + 1, Value = x }).ToDictionary(x => x.Id.ToString(), x => x.Value.Segment);
 
             var body = new Dictionary<string, object>
                 {
                     { "consumerId", "BLACKBIRD" },
-                    { "sourceTexts", batch.Select(s => new { key = s.Id, source = s.GetSource() }).ToArray() },
+                    { "sourceTexts", idSegments.Select(s => new { key = s.Key, source = s.Value.GetSource() }).ToArray() },
                     { "targetLang", new { code = input.TargetLanguage ?? content.TargetLanguage } }
                 };
 
@@ -185,22 +187,32 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
             var client = new PhraseLanguageAiClient(InvocationContext.AuthenticationCredentialsProviders);
 
             var response = await client.ExecuteWithErrorHandling<TranslateTextDto>(request);
-            return response.TranslatedTexts.Select(t => t.Target);
+            return response.TranslatedTexts!;
         }
 
-        var segments = content.GetSegments()
-            .Where(s => !s.IsIgnorbale && s.IsInitial)
-            .ToList();
+        var units = content.GetUnits().Where(x => x.IsInitial);
+        var processedBatches = await units.Batch(6).ProcessParallel(BatchTranslate);
 
-        var segmentTranslations = await segments.Batch(100).Process(BatchTranslate);
-
-        foreach (var (segment, translatedText) in segmentTranslations)
+        foreach (var (unit, results) in processedBatches)
         {
-            if (!string.IsNullOrEmpty(translatedText))
+            foreach (var (segment, translation) in results)
             {
-                segment.SetTarget(translatedText);
-                segment.State = SegmentState.Translated;
+                var shouldTranslateFromState = segment.State == null || segment.State == SegmentState.Initial;
+                if (!shouldTranslateFromState || string.IsNullOrEmpty(translation.Target))
+                {
+                    continue;
+                }
+
+                if (segment.GetTarget() != translation.Target)
+                {
+                    segment.SetTarget(translation.Target);
+                    segment.State = SegmentState.Translated;
+                }
             }
+
+            var uidPart = string.IsNullOrEmpty(input.Uid) ? "" : $"-{input.Uid}";
+            unit.Provenance.Translation.Tool = "plai" + uidPart;
+            unit.Provenance.Translation.ToolReference = "https://phrase.com/platform/ai/";
         }
 
         if (input.OutputFileHandling == "original")
