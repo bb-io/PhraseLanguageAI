@@ -369,3 +369,5 @@ FodyWeavers.xsd
 */appsettings.json
 /Tests.PhraseLanguageAI/appsettings.json
 /Tests.PhraseLanguageAI/appsettings.json
+/Tests.PhraseLanguageAI/TestFiles/Input/to-translate.html
+/Tests.PhraseLanguageAI/TestFiles/Output/to-translate.html.xlf

@@ -17,7 +17,7 @@
     <ItemGroup>
         <PackageReference Include="Blackbird.Applications.SDK.Blueprints" Version="1.0.0-rc.10308" />
         <PackageReference Include="Blackbird.Applications.Sdk.Utils" Version="1.0.26" />
-        <PackageReference Include="Blackbird.Filters" Version="1.1.13" />
+        <PackageReference Include="Blackbird.Filters" Version="1.1.35" />
     </ItemGroup>
 
 </Project>

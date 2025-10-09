@@ -77,17 +77,17 @@ public class PhraseLanguageAiClient : BlackBirdRestClient
         {
             throw new PluginApplicationException("Your request contains invalid input or the server encountered an error. Please review your data and try again");
         }
-        if (response.StatusCode == HttpStatusCode.BadRequest)
-        {
-            throw new PluginApplicationException("Your request contains incorrect input. Please check and correct the information before trying again");
-        }
 
         try
         {
             var error = JsonConvert.DeserializeObject<PhraseError>(response.Content, JsonSettings);
-            if (error.Arguments.Count > 0)
+            if (error?.Arguments.Count > 0)
             {
                 return new PluginApplicationException(string.Join(' ', error.Arguments.Select(x => x.Value)));
+            }
+            if (!string.IsNullOrEmpty(error?.Detail))
+            {
+                return new PluginApplicationException(error.Detail);
             }
             return new PluginApplicationException(error.Title);
             
