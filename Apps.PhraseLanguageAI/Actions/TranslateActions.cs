@@ -61,14 +61,28 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
     {
         var swTotal = Stopwatch.StartNew();
         InvocationContext.Logger?.LogInformation("[PLAI] Translate.start | strategy={0} | file='{1}' | src={2} | trg={3}",
-            new object?[] { input.FileTranslationStrategy ?? "plai", input.File?.Name, input.SourceLang ?? "-", input.TargetLanguage ?? "-" });
+            [input.FileTranslationStrategy ?? "plai", input.File?.Name, input.SourceLang ?? "-", input.TargetLanguage ?? "-"]);
 
         try
         {
             var strategy = input.FileTranslationStrategy?.ToLowerInvariant() ?? "blackbird";
-            return strategy == "blackbird"
-                ? await TranslateWithBlackbird(input)
-                : await TranslateWithPhraseLanguageAINative(input, memories);
+
+            if (strategy == "blackbird")
+            {
+                try
+                {
+                    return await TranslateWithBlackbird(input);
+                }
+                catch (Exception)
+                {
+                    return await TranslateWithPhraseLanguageAINative(input, memories);
+                }
+                
+            } 
+            else
+            {
+                return await TranslateWithPhraseLanguageAINative(input, memories);
+            }
         }
         finally
         {
