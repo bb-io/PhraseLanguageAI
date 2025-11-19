@@ -71,9 +71,12 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
             {
                 try
                 {
-                    return await TranslateWithBlackbird(input);
+                    using var stream = await fileManagerClient.DownloadAsync(input.File);
+                    var content = await Transformation.Parse(stream, input.File.Name);
+
+                    return await HandleInteroperableTransformation(content, input);
                 }
-                catch (Exception)
+                catch (NotImplementedException)
                 {
                     return await TranslateWithPhraseLanguageAINative(input, memories);
                 }
@@ -146,23 +149,6 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
         downloadedFile.Name = originalFileName;
 
         return new FileResponse { File = downloadedFile, Uid = uid };
-    }
-
-    private async Task<FileResponse> TranslateWithBlackbird(TranslateFileInput input)
-    {
-        try
-        {
-            using var stream = await fileManagerClient.DownloadAsync(input.File);
-            var content = await Transformation.Parse(stream, input.File.Name);
-
-            return await HandleInteroperableTransformation(content, input);
-        }
-        catch (Exception e) when (e.Message.Contains("not supported"))
-        {
-            throw new PluginMisconfigurationException(
-                "The file format is not supported by the Blackbird interoperable setting. " +
-                "Try setting the file translation strategy to Phrase Language AI native.");
-        }
     }
 
     private async Task<FileResponse> HandleInteroperableTransformation(Transformation content, TranslateFileInput input)
