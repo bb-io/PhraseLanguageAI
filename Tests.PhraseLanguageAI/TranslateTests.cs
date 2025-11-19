@@ -121,15 +121,18 @@ public class TranslateTests : TestBase
         var actions = new TranslateActions(InvocationContext, FileManager);
         var fileInput = new TranslateFileInput
         {
-            SourceLang = "aa",
-            TargetLanguage = "es",
+            SourceLang = "en",
+            TargetLanguage = "ja",
             File = new FileReference
             {
-                Name = "test.docx"
-            }
+                Name = "Test_Presentation.pptx"
+            },
+            Uid= "EQ2crGLUrRpq4Ju0syVpS2",
+            OutputFileHandling = "original",
+            FileTranslationStrategy = "blackbird",
         };
 
-        var response = await actions.TranslateFileWithQualityEstimation(fileInput, null);
+        var response = await actions.TranslateFileWithQualityEstimation(fileInput, new TransMemoriesConfig { TransMemoryUid= "N0EEJJ5GIGgqiqEvkrzso3" });
 
         Console.WriteLine($"{response.Uid} - {response.Score}");
         Assert.IsNotNull(response);

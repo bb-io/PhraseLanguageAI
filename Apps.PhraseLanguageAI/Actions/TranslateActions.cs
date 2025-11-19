@@ -230,12 +230,17 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
 
 
     [Action("Translate file with quality estimation", Description = "Translate file with quality estimation")]
-    public async Task<TranslationScoreResponse> TranslateFileWithQualityEstimation([ActionParameter] TranslateFileInput input,
+    public async Task<TranslationScoreResponse> TranslateFileWithQualityEstimation([ActionParameter] TranslateWithQualityRequest input,
         [ActionParameter] TransMemoriesConfig? memories)
     {
         var originalFileName = input.File.Name;
 
-        var uploadResponse = await UploadFileForTranslation(input, "QUALITY_ESTIMATION", memories);
+        var uploadResponse = await UploadFileForTranslation(
+            new TranslateFileInput {SourceLang = input.SourceLang ,
+                TargetLanguage = input.TargetLanguage,
+                File = input.File,
+                Uid = input.Uid
+            }, "QUALITY_ESTIMATION", memories);
         var uid = uploadResponse.Uid;
         if (string.IsNullOrEmpty(uid))
             throw new PluginApplicationException("No UID returned after file upload.");
