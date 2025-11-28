@@ -65,6 +65,16 @@ public class PhraseLanguageAiClient : BlackBirdRestClient
 
     protected override Exception ConfigureErrorException(RestResponse response)
     {
+        if(string.IsNullOrEmpty(response.Content))
+        {
+            if (string.IsNullOrEmpty(response.ErrorMessage))
+            {
+                return new PluginApplicationException($"Request failed with status code {response.StatusCode}. {response.StatusDescription}");
+            }
+            
+            return new PluginApplicationException(response.ErrorMessage);
+        }
+        
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
             throw new PluginApplicationException("Access to Phrase Language AI or the language profile is restricted based on your current permissions. Please check and validate your credentials");
