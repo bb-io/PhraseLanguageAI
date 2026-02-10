@@ -151,6 +151,30 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
         return new FileResponse { File = downloadedFile, Uid = uid };
     }
 
+    private static string SanitizeMultipartFileName(string fileName)
+    {
+        fileName = Path.GetFileName(fileName);
+
+        var ext = Path.GetExtension(fileName);
+        var baseName = Path.GetFileNameWithoutExtension(fileName);
+
+        baseName = new string(baseName.Where(c => !char.IsControl(c)).ToArray());
+        baseName = baseName.Replace("\"", "'");
+        baseName = baseName.Replace("\\", "_");
+
+        foreach (var ch in Path.GetInvalidFileNameChars())
+            baseName = baseName.Replace(ch, '_');
+
+        baseName = baseName.Trim();
+        if (string.IsNullOrWhiteSpace(baseName))
+            baseName = "file";
+
+        if (baseName.Length > 120)
+            baseName = baseName.Substring(0, 120);
+
+        return baseName + ext;
+    }
+
     private async Task<FileResponse> HandleInteroperableTransformation(Transformation content, TranslateFileInput input)
     {
         content.SourceLanguage ??= input.SourceLang;
@@ -349,11 +373,13 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
         var fileStream = await fileManagerClient.DownloadAsync(input.File);
 
         var fileName = string.IsNullOrEmpty(input.File.Name) ? "file" : input.File.Name;
+        var safeFileName = SanitizeMultipartFileName(fileName);
+
         var contentType = string.IsNullOrEmpty(input.File.ContentType)
             ? "application/octet-stream"
             : input.File.ContentType;
 
-        request.AddFile("file", () => fileStream, fileName, contentType);
+        request.AddFile("file", () => fileStream, safeFileName, contentType);
 
         var metadata = new Dictionary<string, object>
         {
