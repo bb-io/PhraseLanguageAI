@@ -169,9 +169,6 @@ public class TranslateActions(InvocationContext invocationContext, IFileManageme
         if (string.IsNullOrWhiteSpace(baseName))
             baseName = "file";
 
-        if (baseName.Length > 120)
-            baseName = baseName.Substring(0, 120);
-
         return baseName + ext;
     }
 
