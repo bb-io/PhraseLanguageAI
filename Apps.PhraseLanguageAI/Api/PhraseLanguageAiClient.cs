@@ -33,9 +33,12 @@ public class PhraseLanguageAiClient : BlackBirdRestClient
     {
         var response = await ExecuteAsync(request);
 
-        if (response.StatusCode == HttpStatusCode.TooManyRequests ||
-            response.StatusCode == HttpStatusCode.ServiceUnavailable || 
-            response.StatusCode == HttpStatusCode.InternalServerError)
+        if (response.StatusCode is 
+            HttpStatusCode.TooManyRequests or 
+            HttpStatusCode.ServiceUnavailable or 
+            HttpStatusCode.InternalServerError or 
+            HttpStatusCode.RequestTimeout ||
+            response.ResponseStatus == ResponseStatus.TimedOut)
         {
             const int scalingFactor = 2;
             var retryAfterMilliseconds = 1000;
@@ -66,7 +69,12 @@ public class PhraseLanguageAiClient : BlackBirdRestClient
 
     protected override Exception ConfigureErrorException(RestResponse response)
     {
-        if(string.IsNullOrEmpty(response.Content))
+        if (response.ResponseStatus == ResponseStatus.TimedOut)
+        {
+            throw new PluginApplicationException("The request to Phrase Language AI timed out. The operation took longer than the allowed time limit. Please try again later");
+        }
+
+        if (string.IsNullOrEmpty(response.Content))
         {
             if (string.IsNullOrEmpty(response.ErrorMessage))
             {
@@ -74,11 +82,6 @@ public class PhraseLanguageAiClient : BlackBirdRestClient
             }
             
             return new PluginApplicationException(response.ErrorMessage);
-        }
-
-        if (response.ResponseStatus == ResponseStatus.TimedOut)
-        {
-            throw new PluginApplicationException("The request to Phrase Language AI timed out. The operation took longer than the allowed time limit. Please try again later");
         }
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
