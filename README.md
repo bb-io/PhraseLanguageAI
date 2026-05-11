@@ -86,12 +86,16 @@ Click _Add Connection_ and name it for future reference e.g. 'My Phrase Language
 4. Fill the _Organization ID_.
 5. Click _Connect_.
 
+![Developer API key](Images/README/conn_apikey.png)
+
 ### API Token
 
 1. Select the _API Token_ connection type.
 2. Fill in the _API Token_ that you copied from Phrase.
 3. Select the data center your Phrase instance is hosted on.
 4. Click _Connect_.
+
+![Developer API key](Images/README/conn_apitoken.png)
 
 ## Actions
 
