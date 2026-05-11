@@ -1,9 +1,17 @@
 {
-    "ConnectionDefinition": {
-        "userName": "",
-        "password": "",
-        "url": "",
-        "uid":  ""
-    },
+    "ConnectionDefinition": [
+        {
+            "connectionType": "Developer API key",
+            "userName": "",
+            "password": "",
+            "url": "",
+            "uid":  ""
+        },
+        {
+            "connectionType": "ApiToken",
+            "apiToken": "",
+            "url": "",
+        }
+    ]
     "TestFolder": "C:\\Users\\..."
 }
