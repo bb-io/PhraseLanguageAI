@@ -53,6 +53,8 @@ Domains were created automatically using an AI-powered analysis of documents. An
 
 ## Before setting up
 
+### Developer API key
+
 Before you can connect you need to make sure that:
 
 - You have a Phrase Language AI [account.](https://phrase.com/)
@@ -65,13 +67,35 @@ First - you can find in Enabling SSO settings:
 Second - you can find in Profile settings:
 ![organization ID](Images/README/Option2.png) 
 
+### API Token
+
+- Go to Settings > Profile > Access tokens and click _Generate token_.
+- Under Service, select _Phrase Language AI_. Name your token for future reference.
+- Copy the value of the newly created token. You won't be able to access it again.
+
 ## Connecting
 
-1. Navigate to Apps, and identify the Phrase Language AI app. You can use search to find it.
-2. Click _Add Connection_.
-3. Name your connection for future reference e.g. 'My Phrase Language AI connection'.
-4. Fill in the User name field and Password to your Phrase Language AI account, choose the data center to use and fill the Organization ID.
+Navigate to Apps, and identify the Phrase Language AI app. You can use search to find it. 
+Click _Add Connection_ and name it for future reference e.g. 'My Phrase Language AI connection'.
+
+### Developer API key
+
+1. Select the _Developer API key_ connection type.
+2. Fill in the _User name_ field and _Password_ to your Phrase Language AI account.
+3. Select the data center your Phrase instance is hosted on
+4. Fill the _Organization ID_.
 5. Click _Connect_.
+
+![Developer API key](Images/README/conn_apikey.png)
+
+### API Token
+
+1. Select the _API Token_ connection type.
+2. Fill in the _API Token_ that you copied from Phrase.
+3. Select the data center your Phrase instance is hosted on.
+4. Click _Connect_.
+
+![Developer API key](Images/README/conn_apitoken.png)
 
 ## Actions
 

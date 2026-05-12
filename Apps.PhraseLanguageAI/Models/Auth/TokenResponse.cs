@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Apps.PhraseLanguageAI.Models
+namespace Apps.PhraseLanguageAI.Models.Auth
 {
     public class TokenResponse
     {

@@ -6,4 +6,6 @@ public static class CredsNames
     public const string Password = "password";
     public const string Url = "url";
     public const string OrganizationId = "uid";
+    public const string ApiToken = "apiToken";
+    public const string ConnectionType = "connectionType";
 }

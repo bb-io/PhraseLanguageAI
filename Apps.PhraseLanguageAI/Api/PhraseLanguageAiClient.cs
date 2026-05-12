@@ -1,36 +1,31 @@
 using System.Net;
 using Apps.Appname.Constants;
-using Apps.PhraseLanguageAI.Models;
+using Apps.PhraseLanguageAI.Constants;
+using Apps.PhraseLanguageAI.Models.Auth;
 using Apps.PhraseLanguageAI.Models.Errors;
 using Blackbird.Applications.Sdk.Common.Authentication;
 using Blackbird.Applications.Sdk.Common.Exceptions;
+using Blackbird.Applications.Sdk.Utils.Extensions.Sdk;
 using Blackbird.Applications.Sdk.Utils.RestSharp;
 using Newtonsoft.Json;
 using RestSharp;
 
 namespace Apps.Appname.Api;
 
-public class PhraseLanguageAiClient : BlackBirdRestClient
+public class PhraseLanguageAiClient(IEnumerable<AuthenticationCredentialsProvider> creds) : BlackBirdRestClient(new()
+{
+    BaseUrl = GetUri(creds),
+    MaxTimeout = MaxTimeout,
+    ThrowOnAnyError = false
+})
 {
     private const int MaxTimeout = 900000;
-    public PhraseLanguageAiClient(IEnumerable<AuthenticationCredentialsProvider> creds) : base(new()
-    {
-        BaseUrl = GetUri(creds),
-        MaxTimeout = MaxTimeout,
-        ThrowOnAnyError = false
-    })
-    {
-        var userName = creds.First(p => p.KeyName == CredsNames.UserName).Value;
-        var password = creds.First(p => p.KeyName == CredsNames.Password).Value;
-        var organizationId = creds.First(p => p.KeyName == CredsNames.OrganizationId).Value;
-
-        var token = Login(userName, password, organizationId);
-
-        this.AddDefaultHeader("Authorization", $"Bearer {token}");
-    }
 
     public override async Task<RestResponse> ExecuteWithErrorHandling(RestRequest request)
     {
+        var token = await GetAuthenticationToken();
+        this.AddDefaultHeader("Authorization", token);
+        
         var response = await ExecuteAsync(request);
 
         if (response.StatusCode is 
@@ -59,6 +54,30 @@ public class PhraseLanguageAiClient : BlackBirdRestClient
             throw ConfigureErrorException(response);
 
         return response;
+    }
+
+    private async Task<string> GetAuthenticationToken()
+    {
+        string token = string.Empty;
+        
+        switch (creds.Get(CredsNames.ConnectionType).Value)
+        {
+            case ConnectionTypes.ApiKey:
+                var userName = creds.First(p => p.KeyName == CredsNames.UserName).Value;
+                var password = creds.First(p => p.KeyName == CredsNames.Password).Value;
+                var organizationId = creds.First(p => p.KeyName == CredsNames.OrganizationId).Value;
+                var authorizeCredsResult = await AuthorizeUsingCredentials(userName, password, organizationId);
+                token = $"Bearer {authorizeCredsResult}";
+                break;
+            case ConnectionTypes.ApiToken:
+                var apiToken = creds.Get(CredsNames.ApiToken).Value;
+                var baseUrl = creds.Get(CredsNames.Url).Value;
+                var jwt = await AuthorizeUsingApiToken(baseUrl, apiToken);
+                token = $"Bearer {jwt}";
+                break;
+        }
+
+        return token;
     }
 
     public override async Task<T> ExecuteWithErrorHandling<T>(RestRequest request)
@@ -121,8 +140,32 @@ public class PhraseLanguageAiClient : BlackBirdRestClient
         var url = authenticationCredentialsProviders.First(p => p.KeyName == "url").Value;
         return new(url.TrimEnd('/'));
     }
+    
+    private async Task<string> AuthorizeUsingApiToken(string baseUrl, string apiToken)
+    {
+        string oauthBaseUrl = baseUrl switch
+        {
+            not null when baseUrl.StartsWith("https://eu.phrase") => "https://eu.phrase.com/idm/oauth/token",
+            not null when baseUrl.StartsWith("https://us.phrase") => "https://us.phrase.com/idm/oauth/token",
+            _ => throw new Exception($"Unsupported base URL for API token exchange: {baseUrl}")
+        };
 
-    public string Login(string userName, string password, string organizationId)
+        using var tokenClient = new RestClient();
+        
+        var request = new RestRequest(oauthBaseUrl, Method.Post);
+        request.AddParameter("grant_type", "urn:ietf:params:oauth:grant-type:token-exchange", ParameterType.GetOrPost);
+        request.AddParameter("subject_token", apiToken, ParameterType.GetOrPost);
+        request.AddParameter("subject_token_type", "urn:phrase:params:oauth:token-type:api_token", ParameterType.GetOrPost);
+        request.AddParameter("requested_token_type", "urn:ietf:params:oauth:token-type:access_token", ParameterType.GetOrPost);
+        
+        var response = await ExecuteWithErrorHandling<AccessTokenResponse>(request);
+        if (response?.AccessToken == null)
+            throw new PluginApplicationException("No token returned from login response.");
+
+        return response.AccessToken;
+    }
+
+    public async Task<string> AuthorizeUsingCredentials(string userName, string password, string organizationId)
     {
         var request = new RestRequest("v1/auth/login", Method.Post);
 
@@ -136,7 +179,7 @@ public class PhraseLanguageAiClient : BlackBirdRestClient
             }
         });
 
-        var response = this.ExecuteWithErrorHandling<TokenResponse>(request).GetAwaiter().GetResult();
+        var response = await ExecuteWithErrorHandling<TokenResponse>(request);
 
         if (response?.Token == null)
             throw new PluginApplicationException("No token returned from login response.");

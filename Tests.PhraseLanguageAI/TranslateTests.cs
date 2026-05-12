@@ -1,7 +1,5 @@
 ﻿using Apps.Appname.Actions;
-using Apps.Appname.Handlers;
 using Apps.PhraseLanguageAI.Models.Request;
-using Blackbird.Applications.Sdk.Common.Dynamic;
 using Blackbird.Applications.Sdk.Common.Files;
 using Tests.Appname.Base;
 
@@ -119,7 +117,7 @@ public class TranslateTests : TestBase
     public async Task GetFileScore_IsSuccess()
     {
         var actions = new TranslateActions(InvocationContext, FileManager);
-        var fileInput = new TranslateFileInput
+        var fileInput = new TranslateWithQualityRequest
         {
             SourceLang = "en",
             TargetLanguage = "ja",
@@ -127,9 +125,7 @@ public class TranslateTests : TestBase
             {
                 Name = "Test_Presentation.pptx"
             },
-            Uid= "EQ2crGLUrRpq4Ju0syVpS2",
-            OutputFileHandling = "original",
-            FileTranslationStrategy = "blackbird",
+            Uid= "EQ2crGLUrRpq4Ju0syVpS2"
         };
 
         var response = await actions.TranslateFileWithQualityEstimation(fileInput, new TransMemoriesConfig { TransMemoryUid= "N0EEJJ5GIGgqiqEvkrzso3" });
