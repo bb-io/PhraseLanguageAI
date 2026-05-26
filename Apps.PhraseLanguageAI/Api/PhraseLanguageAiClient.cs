@@ -20,11 +20,14 @@ public class PhraseLanguageAiClient(IEnumerable<AuthenticationCredentialsProvide
 })
 {
     private const int MaxTimeout = 900000;
+    private string? _authorizationToken = null;
 
-    public override async Task<RestResponse> ExecuteWithErrorHandling(RestRequest request)
+    public async Task<RestResponse> ExecuteWithErrorHandling(RestRequest request, bool requireToken = true)
     {
-        var token = await GetAuthenticationToken();
-        this.AddDefaultHeader("Authorization", token);
+        if (requireToken)
+        {
+            request.AddHeader("Authorization", await FetchToken());
+        }
         
         var response = await ExecuteAsync(request);
 
@@ -56,6 +59,13 @@ public class PhraseLanguageAiClient(IEnumerable<AuthenticationCredentialsProvide
         return response;
     }
 
+    private async Task<string> FetchToken()
+    {
+        if (_authorizationToken is not null) return _authorizationToken;
+        _authorizationToken = await GetAuthenticationToken();
+        return _authorizationToken;
+    }
+
     private async Task<string> GetAuthenticationToken()
     {
         string token = string.Empty;
@@ -80,9 +90,9 @@ public class PhraseLanguageAiClient(IEnumerable<AuthenticationCredentialsProvide
         return token;
     }
 
-    public override async Task<T> ExecuteWithErrorHandling<T>(RestRequest request)
+    public async Task<T> ExecuteWithErrorHandling<T>(RestRequest request, bool requireToken = true)
     {
-        var response = await ExecuteWithErrorHandling(request);
+        var response = await ExecuteWithErrorHandling(request, requireToken);
         return JsonConvert.DeserializeObject<T>(response.Content, JsonSettings);
     }
 
@@ -158,7 +168,7 @@ public class PhraseLanguageAiClient(IEnumerable<AuthenticationCredentialsProvide
         request.AddParameter("subject_token_type", "urn:phrase:params:oauth:token-type:api_token", ParameterType.GetOrPost);
         request.AddParameter("requested_token_type", "urn:ietf:params:oauth:token-type:access_token", ParameterType.GetOrPost);
         
-        var response = await ExecuteWithErrorHandling<AccessTokenResponse>(request);
+        var response = await ExecuteWithErrorHandling<AccessTokenResponse>(request, false);
         if (response?.AccessToken == null)
             throw new PluginApplicationException("No token returned from login response.");
 
@@ -179,7 +189,7 @@ public class PhraseLanguageAiClient(IEnumerable<AuthenticationCredentialsProvide
             }
         });
 
-        var response = await ExecuteWithErrorHandling<TokenResponse>(request);
+        var response = await ExecuteWithErrorHandling<TokenResponse>(request, false);
 
         if (response?.Token == null)
             throw new PluginApplicationException("No token returned from login response.");
